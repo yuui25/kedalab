@@ -163,6 +163,9 @@ sudo /snap/bin/docker exec --user root [CONTAINER_ID] \
 - `-it` フラグ（インタラクティブ + TTY）は TTY を確保するが、環境によっては動作しない。その場合は `-i` のみ、または `sh -c '[COMMAND]'` を使う
 - マウント後のパスはコンテナ内のパス。ホストの `/root/root.txt` は `/mnt/host/root/root.txt` でアクセス
 - ホストのファイルシステムへの書き込みも可能なため、SSH 鍵の埋め込みや `/etc/passwd` の書き換えも実施できる
+- `/dev/sda1` が見つからない場合は `lsblk` で確認。`vda1`・`nvme0n1p1` 等、環境によってデバイス名が異なる
+
+> **なぜコンテナ内からホストのブロックデバイスが見えるのか** — Docker の namespace 分離の仕組み・`/dev/sda1` の命名規則・capability との関係を理解したい場合は `../06_Concepts/Docker_Isolation.md` を参照。
 
 ---
 
@@ -170,3 +173,4 @@ sudo /snap/bin/docker exec --user root [CONTAINER_ID] \
 - GTFOBins: https://gtfobins.github.io/
 - その他の昇格手法 → `Capabilities.md`, `SUID_SGID.md`
 - パストラバーサルでコンテナIDを特定 → `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`
+- Docker 分離の原理（なぜ効くか） → `../06_Concepts/Docker_Isolation.md`

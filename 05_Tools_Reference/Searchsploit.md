@@ -171,10 +171,172 @@ sudo searchsploit -u
 
 ---
 
+---
+
+## 製品調査の検索コツ（Google / Web検索）
+
+searchsploit はバージョン×CVE の検索には強いが、**「このアプリのデフォルトパスはどこか」「DBのスキーマはどうなっているか」** といった製品固有の構造調査には向かない。こちらは Google 等で調べる。
+
+### なぜ製品構造を調べるか
+
+パストラバーサルや任意ファイル読み取り系の脆弱性を使うとき、**何を読むべきか**を事前に知っておく必要がある。`/etc/passwd` はどの Linux でも使えるが、**アプリ固有の認証情報・DBファイルのパスはアプリごとに異なる**。
+
+「どこに何があるか」を知るための検索が、攻撃の実効性を大きく左右する。
+
+### 使える検索クエリのパターン
+
+```
+[製品名] default file path
+[製品名] config file location
+[製品名] database path
+[製品名] sqlite schema
+[製品名] source code github
+[製品名] directory structure
+```
+
+**具体例（Grafana の場合）：**
+
+| 知りたいこと | 検索クエリ |
+|------------|-----------|
+| データDBの場所 | `grafana default data path` / `grafana sqlite location` |
+| 設定ファイルの場所 | `grafana config file path linux` |
+| DBのテーブル構成 | `grafana sqlite schema` / `grafana user table password` |
+| Docker での配置 | `grafana docker data directory` |
+| secret_key の場所 | `grafana.ini secret_key` |
+
+**GitHub のソースコードを直接確認する：**
+
+OSSであれば GitHub にソースがある。設定ファイルのサンプルや DB 初期化スクリプトを読むと、パスやスキーマが正確にわかる。
+
+```
+# 検索例
+site:github.com grafana grafana.db schema
+site:github.com grafana "var/lib/grafana"
+
+# または直接リポジトリを検索
+grafana/grafana github
+```
+
+**公式ドキュメントを確認する：**
+
+```
+grafana documentation data directory
+grafana docs configuration file
+```
+
+公式ドキュメントには「インストール時のデフォルトパス」が明示されていることが多い。
+
+### 製品別：よく確認する検索パターン
+
+| 製品 | 調べるべき内容 | 検索クエリ例 |
+|-----|--------------|------------|
+| Grafana | DB・設定ファイルパス | `grafana default data path` / `grafana sqlite schema` |
+| WordPress | DB接続情報・設定ファイル | `wordpress config file location wp-config.php` |
+| Jenkins | 初期パスワード・シークレットの場所 | `jenkins initialAdminPassword location` |
+| GitLab | 設定ファイル・シークレット | `gitlab.rb config file path` |
+| Tomcat | 管理者認証ファイル | `tomcat-users.xml location default` |
+| Kibana | 設定ファイル・ログパス | `kibana config file path linux` |
+
+### 調査の流れ（パストラバーサル発見後の例）
+
+```
+① バージョン確認 → Grafana 8.0.0 と判明
+    ↓
+② CVE 検索（searchsploit）→ CVE-2021-43798 パストラバーサルと判明
+    ↓
+③ 「何を読むか」の調査（Google）
+   検索: "grafana sqlite path" → /var/lib/grafana/grafana.db と判明
+   検索: "grafana sqlite schema" → user テーブルに password/salt カラムがあると判明
+    ↓
+④ パストラバーサルで grafana.db を取得
+    ↓
+⑤ sqlite3 でパスワードハッシュを取得 → Hashcat でクラック
+```
+
+③を省略すると「ファイルをどこで読めばいいか」で詰まる。**CVEを見つけた後、すぐに実行するのではなく、製品構造の調査を挟む**のが重要。
+
+---
+
+## Exploit-DB（Web）の活用
+
+searchsploit は CLI で素早く検索できるが、Exploit-DB の Web サイト（https://www.exploit-db.com/）には CLI にない機能がある。
+
+### searchsploit と Exploit-DB Web の使い分け
+
+| 目的 | 推奨 |
+|-----|-----|
+| 素早くエクスプロイトを探す | `searchsploit` CLI |
+| エクスプロイトの詳細・参考リンクを読む | Exploit-DB Web |
+| CVSSスコア・影響範囲を確認する | Exploit-DB Web + NVD |
+| PoC コードをブラウザで読む | Exploit-DB Web |
+| 関連する他の CVE を芋づる式に探す | Exploit-DB Web |
+
+### Exploit-DB Web の機能
+
+**Advanced Search（詳細検索）：**
+- タイプ別（Remote / Local / WebApp / DoS など）で絞り込める
+- プラットフォーム別（Windows / Linux / Multiple / PHP 等）で絞り込める
+- 日付範囲での検索が可能
+
+**各エクスプロイトページで確認すべき情報：**
+
+```
+1. CVE番号（NVDへのリンクがある）
+2. 影響するバージョンの範囲
+3. 著者のコメント・使い方の説明
+4. References（関連するブログ記事・公式アドバイザリへのリンク）
+5. PoC コードの全文
+```
+
+**`-w` オプションで CLI から URL を取得：**
+
+```bash
+# CLI から Exploit-DB の URL を直接取得
+searchsploit -w grafana 8.0
+# → https://www.exploit-db.com/exploits/50581
+```
+
+ブラウザで開いて References を読むと、より詳細な背景・利用条件がわかる。
+
+### Exploit-DB 以外の情報源と使い分け
+
+| 情報源 | URL | 向いている用途 |
+|--------|-----|--------------|
+| **Exploit-DB** | https://www.exploit-db.com/ | PoC コード・エクスプロイト本体 |
+| **NVD** | https://nvd.nist.gov/vuln/search | CVSSスコア・影響バージョン・公式パッチ情報 |
+| **GitHub** | https://github.com/ | 新しめの PoC（Exploit-DB未掲載のものが多い） |
+| **PacketStorm** | https://packetstormsecurity.com/ | Exploit-DB にないエクスプロイト・ツール |
+| **GreyNoise / Shodan** | shodan.io | 実環境での稼働状況・バージョン分布 |
+
+**GitHub での PoC 検索：**
+
+Exploit-DB は掲載まで時間がかかることがある。新しい CVE は GitHub を先に確認する。
+
+```
+# Google 経由
+site:github.com CVE-2021-43798
+
+# GitHub 検索バー
+CVE-2021-43798 PoC
+grafana path traversal exploit
+```
+
+**NVD で正確な影響範囲を確認：**
+
+searchsploit のタイトルだけでは「自分のバージョンが本当に対象か」が曖昧なことがある。NVD の CPE（Common Platform Enumeration）欄には影響を受ける正確なバージョン範囲が記載されている。
+
+```
+https://nvd.nist.gov/vuln/detail/CVE-2021-43798
+→ Affected versions: 8.0.0 ～ 8.3.0 と確認できる
+```
+
+---
+
 ## 関連ツール・リソース
 
 - Exploit-DB Web: https://www.exploit-db.com/
-- NVD (CVE詳細): https://nvd.nist.gov/vuln/search
+- NVD (CVE詳細・影響バージョン): https://nvd.nist.gov/vuln/search
+- PacketStorm: https://packetstormsecurity.com/
 - GitHub PoC 検索: `site:github.com CVE-[YEAR]-[NUMBER]`
 - Webバージョン確認からCVE特定 → `../01_Reconnaissance/Web_Enumeration.md`
 - パストラバーサルの実施 → `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`
