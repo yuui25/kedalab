@@ -219,8 +219,31 @@ kedalab/
 │   ├── Hashcat.md
 │   └── Searchsploit.md
 │
-└── 06_Concepts/                     # 「なぜそうなるか」の原理・背景知識
-    └── Docker_Isolation.md
+├── 06_Concepts/                     # 「なぜそうなるか」の原理・背景知識
+│   └── Docker_Isolation.md
+│
+└── 07_AI_ML/                        # AI・機械学習の知識ベース
+    ├── Overview.md                  # ML種類・評価指標・過学習
+    ├── Supervised_Learning/
+    │   ├── Linear_Regression.md    # 線形回帰・ロジスティック回帰
+    │   ├── Decision_Trees.md       # 決定木・ランダムフォレスト
+    │   ├── Naive_Bayes.md          # ナイーブベイズ（テキスト分類）
+    │   └── SVM.md                  # サポートベクターマシン
+    ├── Unsupervised_Learning/
+    │   ├── KMeans_Clustering.md    # K-Meansクラスタリング
+    │   ├── PCA.md                  # 主成分分析・次元削減
+    │   └── Anomaly_Detection.md    # 異常検知（Isolation Forest等）
+    ├── Reinforcement_Learning/
+    │   ├── RL_Overview.md          # 強化学習の基本概念
+    │   ├── Q_Learning.md           # Q-Learning
+    │   └── SARSA.md                # SARSA
+    ├── Deep_Learning/
+    │   ├── Neural_Networks.md      # パーセプトロン・NN・Autoencoder
+    │   ├── CNN.md                  # 畳み込みNN・転移学習
+    │   └── RNN.md                  # RNN・LSTM・GRU
+    └── Generative_AI/
+        ├── LLM.md                  # Transformer・LLM・RAG・LoRA
+        └── Diffusion_Models.md     # 拡散モデル・Stable Diffusion
 ```
 
 ### 各セクションの役割
