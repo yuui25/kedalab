@@ -121,6 +121,7 @@
 
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
+| AIシステムへの攻撃面・アクセスレベル・攻撃目的の分類 | AI Red Teaming 基礎 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | 機械学習の種類と選択基準（教師あり・なし・強化学習） | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
 | 過学習・未学習・バイアス-バリアンストレードオフ | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
 | 評価指標（Accuracy・Precision・Recall・F1・ROC-AUC） | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
@@ -189,12 +190,18 @@
 | 歪み補正（log1p 変換・Skewed Data 処理） | AI/ML 前処理 | `06_Concepts/AI_ML/Data_Transformation.md` |
 | データ分割（Train/Validation/Test・Data Leakage 防止） | AI/ML 前処理 | `06_Concepts/AI_ML/Data_Transformation.md` |
 
-### データ攻撃
+### データ攻撃・敵対的攻撃
 
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
 | データ品質属性と攻撃ベクタの対応（ノイズインジェクション・ラベルフリッピング・バイアスインジェクション） | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
 | クラス不均衡攻撃（少数クラスの意図的欠落） | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
+| 敵対的サンプル攻撃の原理（ノルム制約・決定境界の不安定性） | AI Evasion 基礎 | `06_Concepts/AI_ML/Adversarial_Examples.md` |
+| FGSM（Fast Gradient Sign Method）— 一階勾配ベース攻撃 | AI Evasion | `06_Concepts/AI_ML/Adversarial_Examples.md` |
+| PGD（Projected Gradient Descent）— 反復型敵対的攻撃 | AI Evasion | `06_Concepts/AI_ML/Adversarial_Examples.md` |
+| ホワイトボックス／ブラックボックス脅威モデルの分類 | AI Evasion | `06_Concepts/AI_ML/Adversarial_Examples.md` |
+| 転移可能性（Transferability）— ブラックボックス攻撃への応用 | AI Evasion | `06_Concepts/AI_ML/Adversarial_Examples.md` |
+| Sparsity Attack — L0ノルム制約による最小変更攻撃 | AI Evasion | `06_Concepts/AI_ML/Adversarial_Examples.md` |
 
 ---
 
