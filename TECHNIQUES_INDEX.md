@@ -21,7 +21,9 @@
 | Webアプリバージョン特定（/api/health 等） | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
 | searchsploit による CVE 検索 | Reconnaissance | `05_Tools_Reference/Searchsploit.md` |
 | SMB匿名アクセス | Reconnaissance | `01_Reconnaissance/SMB_Enumeration.md` |
+| SYSVOL / Replication 内部ナビゲーション観点（GPO構造・フォルダ優先度） | Reconnaissance | `01_Reconnaissance/SMB_Enumeration.md` |
 | SYSVOL列挙 | Reconnaissance | `01_Reconnaissance/SMB_Enumeration.md` |
+| GPP 認証情報取得（Groups.xml / cpassword / gpp-decrypt） | Reconnaissance → Initial Access | `01_Reconnaissance/SMB_Enumeration.md` |
 | LDAP ユーザー列挙 | Reconnaissance | `01_Reconnaissance/LDAP_Enumeration.md` |
 | LDAP カスタム属性の確認（info / description） | Reconnaissance | `01_Reconnaissance/LDAP_Enumeration.md` |
 
@@ -43,6 +45,7 @@
 | WebアプリDB（SQLite等）からのハッシュ取得 | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
 | PBKDF2-HMAC-SHA256 ハッシュのクラック（mode 10900） | Initial Access | `05_Tools_Reference/Hashcat.md` |
 | スクリプトへの平文パスワード埋め込み | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
+| GPP cpassword の復号（gpp-decrypt） | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
 | LDAPカスタム属性への平文パスワード | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
 | パスワードの使い回し確認 | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
 | strings コマンドによる文字列抽出 | Initial Access | `02_Initial_Access/Binary_Analysis.md` |
@@ -105,7 +108,7 @@
 
 | ツール | ファイルパス |
 |--------|------------|
-| nmap | `05_Tools_Reference/Nmap.md` |
+| nmap（-sC 出力の読み方・AD環境向け） | `05_Tools_Reference/Nmap.md` |
 | BloodHound / bloodhound-python | `05_Tools_Reference/BloodHound.md` |
 | Impacket スイート全般 | `05_Tools_Reference/Impacket_Suite.md` |
 | hashcat | `05_Tools_Reference/Hashcat.md` |

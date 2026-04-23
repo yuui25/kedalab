@@ -67,15 +67,21 @@ smbclient -L //[IP] -N
 
 **非標準の共有名に注目。** `ADMIN$`, `C$`, `IPC$`, `NETLOGON`, `SYSVOL` 以外の共有があればアクセスを試みる。
 
-### SYSVOL匿名アクセス
+### SYSVOL / Replication の匿名アクセス
 
 ```bash
-smbclient -N //[IP]/SYSVOL
+# SYSVOL または Replication 共有を再帰的に列挙
+smbclient -N //[IP]/SYSVOL -c "recurse ON; ls" 2>/dev/null
+smbclient -N //[IP]/Replication -c "recurse ON; ls" 2>/dev/null
 ```
 
-`scripts/` や `Policies/` 配下にスクリプトファイルがある場合、**平文パスワードが含まれることがある。**
+**確認する優先フォルダ：**
+1. `[domain.name]/Policies/{GUID}/MACHINE/Preferences/Groups/Groups.xml` → **`cpassword` があれば GPP 認証情報**
+2. `[domain.name]/scripts/` → `.bat` / `.ps1` → 平文パスワードの可能性
 
-→ 詳細: `../01_Reconnaissance/SMB_Enumeration.md`
+**`[domain.name]`（例: `active.htb`）という名前のフォルダが見えたら必ず降りる。** SYSVOL系の共有は、ドメイン名と同名フォルダがルート直下に存在するのが正常構造。
+
+→ 詳細（ナビゲーション観点・GPP手順）: `../01_Reconnaissance/SMB_Enumeration.md`
 
 ### ASREPRoasting（認証情報なし）
 
@@ -89,6 +95,7 @@ smbclient -N //[IP]/SYSVOL
 
 | 状況 | 手法 |
 |------|------|
+| Replication / SYSVOL に `Groups.xml` がある | `cpassword` 属性を `gpp-decrypt` で復号 → GPP認証情報取得 |
 | 非標準SMB共有にファイルがある | ダウンロードして内容確認（バイナリ解析含む） |
 | SYSVOL に .bat / .ps1 がある | 平文パスワードを探す |
 | .NET バイナリが取得できた | 逆コンパイル→ハードコード認証情報の確認 |

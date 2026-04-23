@@ -137,6 +137,39 @@ print(f'sha256:10000:{base64.b64encode(salt).decode()}:{base64.b64encode(hash_by
 
 ---
 
+## パターン6: GPP (Group Policy Preferences) の cpassword
+
+### 着火条件
+- SYSVOL または Replication 共有に匿名または認証ありでアクセスできた
+- `Policies/{GUID}/MACHINE/Preferences/Groups/Groups.xml` が取得できた
+- XML内に `cpassword=` 属性が存在する
+
+### 観点・着眼点
+
+グループポリシー基本設定でローカルアカウントやサービスアカウントを管理している環境では、パスワードが `Groups.xml` に AES-256 暗号化された形（`cpassword`）で保存される。ただし AES の鍵を Microsoft が公開しているため、**ツール1コマンドで平文に復元できる**。
+
+`Groups.xml` の `userName` 属性がドメインアカウントを指している場合（例: `DOMAIN\SVC_xxx`）、そのアカウントのドメインパスワードが得られる。
+
+### 手順
+
+```bash
+# gpp-decrypt（Kali Linux 標準搭載）
+gpp-decrypt '[cpassword 属性の値]'
+
+# 取得できる情報を確認
+# - userName: 対象アカウント（DOMAIN\username 形式）
+# - cpassword: 復号するとパスワード
+```
+
+### 注意点・落とし穴
+- `action="U"` は既存アカウントの更新（パスワード変更）を意味する。現在も有効なパスワードの可能性が高い
+- `Groups.xml` 以外にも GPP 認証情報が保存されるファイルがある: `Services.xml`, `ScheduledTasks.xml`, `Printers.xml`, `Drives.xml` — いずれも同様に `cpassword` を含む可能性がある
+- 取得したアカウントが低権限でも、そのアカウントで LDAP・SMB・BloodHound の認証が通るため、AD全体の列挙が一気に進む
+
+→ 詳細な取得手順: `../../01_Reconnaissance/SMB_Enumeration.md`（GPPセクション）
+
+---
+
 ## 認証情報を取得したら必ず試すこと
 
 **パスワードの使い回し確認：**

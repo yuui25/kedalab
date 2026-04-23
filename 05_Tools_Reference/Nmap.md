@@ -60,6 +60,61 @@ grep "open" nmap_allports.nmap | grep -v "Not shown"
 xmllint --format nmap_initial.xml
 ```
 
+## `-sC` スキャン結果の読み方（AD環境）
+
+`-sC` はデフォルトスクリプトを実行するオプション。AD環境では以下の情報が自動的に取得できる。
+
+### 確認する順番と着眼点
+
+**① ドメイン名・ホスト名（LDAP / SMB バナーから）**
+```
+389/tcp open ldap  Microsoft Windows Active Directory LDAP
+|                  (Domain: example.htb, Site: Default-First-Site-Name)
+```
+→ `Domain:` の値が AD のドメイン名。**`/etc/hosts` への登録をここで行う。**
+
+**② ホスト名とOS（Service Info から）**
+```
+Service Info: Host: DC; OS: Windows; CPE: cpe:/o:microsoft:windows_server_2008:r2:sp1
+```
+→ `Host:` = NetBIOS ホスト名（DC, FILESERVER 等）。OS バージョンも判明。
+
+**③ SMB 署名（smb2-security-mode スクリプトから）**
+```
+| smb2-security-mode:
+|   2.1:
+|_    Message signing enabled and required
+```
+→ `required` の場合 → **NTLM リレー攻撃は使えない**。`not required` なら使える。
+
+**④ AD 確定の判断（ポート構成から）**
+
+| ポートの組み合わせ | 判断 |
+|-----------------|------|
+| 88 (Kerberos) が開いている | AD 環境確定 |
+| 53 + 88 + 389 + 445 | DC（ドメインコントローラー）の可能性が高い |
+| 3268 / 3269 | Global Catalog → DC 確定 |
+
+**⑤ 時刻ズレ（smb2-time / clock-skew）**
+```
+|_clock-skew: -1m13s
+```
+→ Kerberos は時刻ズレ **5分以内** を要求する。大きくズレている場合は `faketime` や `ntpdate` で合わせる。
+
+### AD 環境での典型的な読み方まとめ
+
+```
+# この出力が出たら → AD環境 + DC確定
+88/tcp   open  kerberos-sec  → AD確定
+389/tcp  open  ldap  (Domain: xxx.htb) → ドメイン名を /etc/hosts に登録
+445/tcp  open  microsoft-ds  → SMBアクセスを試みる
+smb2-security-mode: signing required → NTLMリレー不可
+
+# 次のアクション: SMB匿名アクセス → LDAP列挙
+```
+
+---
+
 ## 注意点
 
 - `--min-rate` を高くしすぎると一部のポートが `filtered` と誤判定されることがある
