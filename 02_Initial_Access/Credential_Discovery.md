@@ -29,6 +29,12 @@ tshark -r capture.pcap | head -100
 strings capture.pcap | grep -i "user\|pass\|login\|auth" | head -50
 ```
 
+### 注意点・落とし穴
+- `PASS` コマンドの引数がパスワードになる。空パスワードでも `PASS` 行は出るため、前後の `USER` 行とセットで確認する
+- PCAPが大きい場合 `strings` は GB 単位でも数秒で終わるが、誤マッチが多いため補助手段として使う
+- `https` トラフィックは復号できない（鍵がない限り）。平文は `http` / `ftp` / `telnet` / `pop3` / `imap` など
+- 認証情報を拾ったら **日付・ホスト名もメモしておく**。古すぎる PCAP のパスワードは現在変更されている可能性
+
 ---
 
 ## パターン2: スクリプトファイルへの平文パスワード埋め込み
@@ -49,6 +55,12 @@ cat users.bat
 # net user A.Username P4ssw0rd1#123
 ```
 
+### 注意点・落とし穴
+- `.bat` / `.ps1` / `.vbs` だけでなく `.config` / `.ini` / `.xml` にも平文認証情報があることがある
+- SYSVOL はドメイン参加ユーザーなら誰でも読めるのが既定。低権限アカウントでの横展開の糸口
+- `findstr /si password *.xml *.ini *.txt` を Windows 側で実行するとまとめて拾える（対応する Linux 側は `grep -risE 'pass(word)?='`）
+- **スケジュールタスク XML** / **スクリプト実行時の引数** にパスワードが渡されている場合もあるので、Groups.xml 以外も全部舐める
+
 ---
 
 ## パターン3: LDAPのカスタム属性への平文パスワード保存
@@ -67,6 +79,11 @@ ldapsearch ... "(objectClass=user)" sAMAccountName info description \
 
 → 詳細: `../../01_Reconnaissance/LDAP_Enumeration.md`
 
+### 注意点・落とし穴
+- `info` は GUI の「説明」欄とは別の目立たないフィールド。見落とされやすい分だけ平文パスワードが残りやすい
+- 一時パスワードが書かれていても `userAccountControl` に `PASSWORD_EXPIRED` が立っていないか確認。既に使われなくなっている可能性
+- `description` / `info` が暗号文っぽい場合、別フィールドに鍵が書かれていることもある（例: `extensionAttribute1`）
+
 ---
 
 ## パターン4: バイナリ・設定ファイルへのハードコード
@@ -78,6 +95,11 @@ ldapsearch ... "(objectClass=user)" sAMAccountName info description \
 開発者がアプリケーション内に認証情報を直接書き込んでいる場合がある（LDAP接続用パスワード等）。暗号化されていても、XOR程度の簡易暗号はバイナリ解析で復号できる。
 
 → 詳細: `../Binary_Analysis.md`
+
+### 注意点・落とし穴
+- `web.config` / `appsettings.json` / `.env` / `docker-compose.yml` は最優先で確認する（バイナリ解析より前）
+- .NET バイナリは `strings` でも見つかることが多いが、UTF-16LE エンコードなので `strings -e l` を併用
+- 見つかった認証情報が開発用で接続先が `localhost` や内部ホスト → そのホスト名が DNS で引けるか確認（パストラバーサル等で `/etc/hosts` を拾うと分かることがある）
 
 ---
 
