@@ -153,27 +153,68 @@ model.fc = nn.Linear(2048, num_classes)
 
 **着火条件：** 画像ベースのマルウェア分類器を学習・評価する際の標準データセットとして参照する。
 
+**データセット取得：**
+
+```bash
+# Kaggle API 経由で取得
+wget https://www.kaggle.com/api/v1/datasets/download/ikrambenabd/malimg-original -O malimg.zip
+unzip malimg.zip
+# → malimg_paper_dataset_imgs/<ファミリー名>/ の構成で展開される
+```
+
+論文および公式ページは Kaggle 上の `ikrambenabd/malimg-original` を参照。
+
 **データセット構造：**
 - 9,339枚・25クラス（マルウェアファミリー単位）のグレースケール PNG 画像
 - 各画像は Windows PE ファイル（実行可能バイナリ）をバイト単位で可視化したもの
 - 1ピクセル = 1バイト（値 0→黒、255→白、中間→グレー）
-- ロスレスエンコーディング：画像からバイナリを完全再現可能
+- ロスレスエンコーディング：画像からバイナリを完全再現可能（情報損失なし）
 - フォルダ構成：`malimg_paper_dataset_imgs/<ファミリー名>/` 形式でクラスごとに分離
+- **同ファミリーのサンプルは視覚的に識別可能なパターンを共有している**（コードセクションの繰り返し構造・暗号化ブロックの濃淡パターンなど）
 
-**クラス不均衡の確認手順：**
-- データ探索の最初にクラスごとのサンプル数を集計してバープロット化する
-- 不均衡が大きい場合、学習後の精度が支配的クラスに偏る可能性がある
-- 対策：データ拡張・オーバーサンプリング・クラス重み付き損失関数（`weight` パラメータ）
+**クラス分布の EDA → 意思決定フロー：**
+
+```
+① クラスごとのサンプル数を集計
+② 水平バープロットで可視化（クラス数が多いため horizontal が読みやすい）
+③ 過剰・不足クラスを目視で特定
+④ 学習後の精度が期待値を下回る場合 → 学習前にデータセットを調整する
+```
 
 ```python
 import os
+import matplotlib.pyplot as plt
+import seaborn as sns
 
+DATA_BASE_PATH = "./malimg_paper_dataset_imgs/"
+
+# ① クラス分布の集計
 dist = {cls: len(os.listdir(os.path.join(DATA_BASE_PATH, cls)))
         for cls in os.listdir(DATA_BASE_PATH)}
-# → {ファミリー名: サンプル数} の辞書。不均衡クラスを特定する
+
+# ② 水平バープロット（クラス名が長い・クラス数が多い場合は orient='h' が標準）
+classes = list(dist.keys())
+counts  = list(dist.values())
+
+plt.figure(figsize=(8, 10))
+sns.barplot(y=classes, x=counts, orient='h')
+plt.title("Malware Class Distribution")
+plt.xlabel("Samples")
+plt.ylabel("Malware Family")
+plt.tight_layout()
+plt.show()
 ```
 
-**観点：** `Allaple.A`・`Allaple.L` 系は他ファミリーより大幅にサンプル数が多い。精度評価時は macro avg と weighted avg の乖離でクラス不均衡の影響を確認する。
+**観点・着眼点：**
+
+| 確認するシグナル | 次のアクション |
+|---------------|--------------|
+| 特定クラスのサンプル数が他の 5 倍以上 | そのクラスの weighted avg が全体 accuracy を引き上げている可能性 → macro avg で評価 |
+| 精度・F1 が期待値を下回る | 不均衡クラスにオーバーサンプリング or クラス重み付き損失を適用してから再学習 |
+| macro avg ≪ weighted avg | 少数クラスの recall が低い → クラス不均衡が原因と判断できる |
+
+- Malimg では `Allaple.A`・`Allaple.L` 系が他ファミリーと比較して大幅にサンプル数が多い
+- 不均衡への対策：データ拡張・オーバーサンプリング（imbalanced-learn）・`CrossEntropyLoss(weight=...)` でクラス重みを指定する
 
 ---
 

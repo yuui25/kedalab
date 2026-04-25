@@ -212,7 +212,8 @@
 | マルウェア分類手法の選択基準（静的解析・動的解析・画像ベースMLの使い分け） | Security / Malware | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | 画像ベースマルウェア分類の安全性（バイナリ不使用・感染リスクなし） | Security / Malware | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | Malimg データセット構造（25クラス・9339枚・1ピクセル=1バイト・ロスレスエンコーディング） | Security / Dataset | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
-| クラス不均衡の可視化と対策（データ探索→バープロット→クラス重み付き損失） | AI/ML 前処理 | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| Malimg データセット取得（Kaggle API wget + unzip） | Security / Dataset | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| クラス不均衡の可視化と対策（EDA → seaborn 水平バープロット → macro avg 乖離確認 → クラス重み付き損失） | AI/ML 前処理 | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | split-folders による画像データセット分割（80/20・valフォルダ空パターン） | AI/ML 前処理 | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | torchvision ImageFolder + DataLoader パイプライン（フォルダ名→ラベル自動認識） | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | ResNet50 全層 freeze + 最終 FC 層差し替えによる転移学習 | Deep Learning / Security | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
