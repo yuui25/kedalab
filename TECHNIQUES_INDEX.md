@@ -242,7 +242,15 @@
 | LLM（大規模言語モデル）・GPT系・BERT系 | Generative AI | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
 | RAG（Retrieval-Augmented Generation） | Generative AI | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
 | Fine-tuning・LoRA | Generative AI | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
-| プロンプトインジェクション攻撃 | Generative AI / Security | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
+| プロンプトインジェクション攻撃（直接型・間接型） | Generative AI / Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
+| LLM OWASP Top 10 分類フレームワーク（LLM01〜LLM10・着火条件・連鎖パターン） | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
+| Sensitive Information Disclosure — Fine-tuning 済みモデルの学習データ漏洩 | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
+| Improper Output Handling — LLM出力経由の XSS・SQLi・Command Injection | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
+| Excessive Agency — LLMへの最小権限原則適用・ホワイトリスト設計 | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
+| System Prompt Leakage — LLM攻撃の第一ステップとしてのシステムプロンプト漏洩 | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
+| Vector and Embedding Weaknesses — RAG埋め込みのポイズニング・不正取得 | LLM Security / RAG | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
+| Misinformation / Hallucination — LLM生成コードの脆弱性・Overreliance | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
+| Unbounded Consumption — LLM DoS・コスト攻撃・サロゲートモデル学習への連鎖 | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
 | 拡散モデル（Diffusion Models）・Stable Diffusion | Generative AI | `06_Concepts/AI_ML/Generative_AI/Diffusion_Models.md` |
 | Latent Diffusion・DDIM・LCM | Generative AI | `06_Concepts/AI_ML/Generative_AI/Diffusion_Models.md` |
 
