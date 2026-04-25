@@ -161,6 +161,11 @@
 | Bag-of-Words モデル（CountVectorizer・語彙構築・unigram/bigram） | Supervised Learning / NLP | `06_Concepts/AI_ML/Supervised_Learning/Feature_Extraction.md` |
 | CountVectorizer パラメータ（min_df・max_df・ngram_range） | Supervised Learning / NLP | `06_Concepts/AI_ML/Supervised_Learning/Feature_Extraction.md` |
 | テキスト→数値ベクトル変換の3ステージ（Tokenization・語彙構築・Vectorization） | Supervised Learning / NLP | `06_Concepts/AI_ML/Supervised_Learning/Feature_Extraction.md` |
+| sklearn Pipeline（前処理＋分類器の一本化） | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Model_Training_Pipeline.md` |
+| GridSearchCV（ハイパーパラメータチューニング・クロスバリデーション） | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Model_Training_Pipeline.md` |
+| MultinomialNB alpha スムージング係数のチューニング | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Model_Training_Pipeline.md` |
+| joblib によるモデルの保存と読み込み（シリアライズ） | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Model_Training_Pipeline.md` |
+| 推論時の一貫した前処理（transform のみ・fit 禁止） | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Model_Training_Pipeline.md` |
 | SVM（サポートベクターマシン）・カーネルトリック | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/SVM.md` |
 
 ### 教師なし学習
