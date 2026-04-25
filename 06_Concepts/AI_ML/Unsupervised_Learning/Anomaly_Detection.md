@@ -168,11 +168,54 @@ multi_y = df['attack_map']
 
 > `flag` 列は LabelEncoder より one-hot の方が望ましいが、探索段階では `get_dummies` でまとめて処理しても支障ない。本番 Pipeline では `OneHotEncoder` を使う → `../../Data_Transformation.md`
 
+### 評価ワークフロー（Validation → Test の2段階）
+
+**着火条件：** モデルの学習が完了し、汎化性能を測定したい段階。
+
+**手順：**
+
+1. **Validation set で初期評価** → 指標を確認し問題があれば特徴量・ハイパーパラメータを調整
+2. **Test set で最終評価** → Validation に過学習していないか確認するため、必ず分離したデータで最後に1回だけ評価する
+3. **Confusion Matrix で誤分類パターンを可視化** → どのクラスをどのクラスと間違えているか確認
+
+```python
+from sklearn.metrics import confusion_matrix, classification_report
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+class_labels = ['Normal', 'DoS', 'Probe', 'Privilege', 'Access']
+
+# Confusion Matrix の可視化
+conf_matrix = confusion_matrix(y_true, predictions)
+sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues',
+            xticklabels=class_labels, yticklabels=class_labels)
+plt.title('Network Anomaly Detection')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.show()
+
+# per-class の詳細レポート
+print(classification_report(y_true, predictions, target_names=class_labels))
+```
+
+**Confusion Matrix の読み方：**
+
+- **対角線上の値** = 正しく分類できた数（大きいほど良い）
+- **行** = 実際のクラス / **列** = モデルが予測したクラス
+- 行 i・列 j の値が大きい → クラス i のサンプルをクラス j と誤分類している
+- 例：Privilege 行の Normal 列が大きい → 権限昇格攻撃を正常通信と見誤っている
+
+**weighted avg / macro avg の乖離に注意：**
+
+- 乖離が大きい場合はクラス不均衡のシグナル → `../../Overview.md` の「classification_report の読み方」を参照
+- `support` 列が小さいクラス（< 50 程度）の指標は統計的に不安定。単独で判断しない
+
 ### 関連技術
 
 - PCA（次元削減してから異常検知） → `PCA.md`
 - K-Meansクラスタリング（クラスタから外れた点を異常とみなす） → `KMeans_Clustering.md`
 - Autoencoder → `../Deep_Learning/Neural_Networks.md`
 - Random Forest（教師あり異常検知・特徴量重要度） → `../Supervised_Learning/Decision_Trees.md`
+- classification_report の読み方・weighted avg vs macro avg → `../../Overview.md`
 
 > 原理（異常スコアの統計的な意味・ROC/AUCの解釈） → `../../06_Concepts/Anomaly_Detection_Theory.md`

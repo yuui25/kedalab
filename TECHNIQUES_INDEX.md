@@ -148,6 +148,9 @@
 | 補足指標（Specificity・AUC・Matthews Correlation Coefficient） | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
 | セキュリティ文脈での指標選択（脅威検知→Recall・誤検知削減→Precision） | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
 | データ漏洩（Data Leakage）の防止 | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
+| classification_report の読み方（precision/recall/f1/support の意味） | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
+| weighted avg vs macro avg の乖離によるクラス不均衡検出 | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
+| support が小さいクラスの指標は不安定（統計的信頼性の判断） | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
 
 ### 教師あり学習
 
@@ -181,6 +184,8 @@
 | Random Forestによる教師あり侵入検知（正常ラベルあり・多クラス分類） | Unsupervised Learning / Security | `06_Concepts/AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
 | NSL-KDDデータセット特徴量構造（ネットワーク侵入検知ベンチマーク） | Security / Dataset | `06_Concepts/AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
 | 多クラス攻撃カテゴリマッピング（DoS/Probe/Privilege/Access・map_attack関数） | Security / Dataset | `06_Concepts/AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
+| Validation → Test 2段階評価ワークフロー（汎化性能の最終確認） | Supervised Learning / Security | `06_Concepts/AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
+| Confusion Matrix 可視化（seaborn heatmap・多クラス誤分類パターン読み方） | AI/ML 評価 | `06_Concepts/AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
 | pd.get_dummies（pandas one-hot encoding・OneHotEncoderとの使い分け） | AI/ML 前処理 | `06_Concepts/AI_ML/Data_Transformation.md` |
 | encoded.join による特徴量行列の構築（カテゴリ+数値の結合） | AI/ML 前処理 | `06_Concepts/AI_ML/Data_Transformation.md` |
 
