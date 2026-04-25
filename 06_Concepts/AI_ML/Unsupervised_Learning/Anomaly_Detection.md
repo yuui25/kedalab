@@ -72,10 +72,65 @@
 - 認証ログ解析：異常な時間帯・場所からのログインを検出
 - → これらはルールベース（SIEM）とML異常検知の組み合わせが現実的
 
+---
+
+## ランダムフォレストによるネットワーク侵入検知（教師あり異常検知）
+
+### 着火条件
+
+- 正常・異常の**ラベル付きデータ**が手元にある（教師あり設定）
+- 高次元のネットワーク特徴量（40超のカラム等）を扱っており、単純な統計的手法では対応できない
+- 特徴量重要度を確認し「どのネットワーク指標が攻撃判断に効いているか」を把握したい
+
+### 観点・着眼点
+
+教師なし手法（Isolation Forest等）との使い分け：
+
+| 条件 | 推奨手法 |
+|------|---------|
+| ラベルなし・正常データのみ | Isolation Forest / One-Class SVM |
+| ラベルあり・正常と攻撃の両方 | Random Forest（教師あり） |
+| 攻撃種別まで分類したい | Random Forest（多クラス分類） |
+
+**ランダムフォレストが侵入検知に向く理由：**
+- 高次元データ（40以上の特徴量）でも過学習しにくい
+- カテゴリ変数（プロトコル種別・サービス種別）と数値変数が混在していても対応しやすい
+- `feature_importances_` で「どの特徴量が攻撃判断に寄与しているか」が可視化できる
+
+### NSL-KDD データセットの特徴量構造
+
+ネットワーク侵入検知の標準ベンチマークデータセット。KDD Cup 1999 の冗長エントリ・クラス不均衡を改善したもの。42 の特徴量 + 攻撃種別ラベルで構成される。
+
+**特徴量カテゴリ：**
+
+| カテゴリ | 代表的なカラム | 意味 |
+|---------|-------------|------|
+| 基本統計 | `duration`, `src_bytes`, `dst_bytes` | 接続時間・送受信バイト数 |
+| プロトコル | `protocol_type`, `service`, `flag` | TCP/UDP/ICMP・対象サービス・接続状態 |
+| コンテンツ特徴 | `num_failed_logins`, `root_shell`, `su_attempted` | 認証失敗回数・root昇格試行 |
+| トラフィック統計 | `serror_rate`, `rerror_rate`, `same_srv_rate` | エラー率・同一サービスへの接続率 |
+| 宛先ホスト統計 | `dst_host_count`, `dst_host_serror_rate` | 同一宛先への接続数・エラー率 |
+| ラベル | `attack`, `level` | 攻撃種別・重篤度 |
+
+**`attack` カラムの値例（二値化で使う場合）：**
+```python
+# 正常/異常の二値ラベルに変換
+df["label"] = df["attack"].apply(lambda x: 0 if x == "normal" else 1)
+```
+
+**カテゴリ変数のエンコード（`protocol_type` 等）：**
+```python
+from sklearn.preprocessing import LabelEncoder
+le = LabelEncoder()
+for col in ["protocol_type", "service", "flag"]:
+    df[col] = le.fit_transform(df[col])
+```
+
 ### 関連技術
 
 - PCA（次元削減してから異常検知） → `PCA.md`
 - K-Meansクラスタリング（クラスタから外れた点を異常とみなす） → `KMeans_Clustering.md`
 - Autoencoder → `../Deep_Learning/Neural_Networks.md`
+- Random Forest（教師あり異常検知・特徴量重要度） → `../Supervised_Learning/Decision_Trees.md`
 
 > 原理（異常スコアの統計的な意味・ROC/AUCの解釈） → `../../06_Concepts/Anomaly_Detection_Theory.md`

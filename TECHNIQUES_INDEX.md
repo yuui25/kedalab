@@ -156,6 +156,8 @@
 | 線形回帰（Linear Regression）+ Ridge/Lasso | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Linear_Regression.md` |
 | ロジスティック回帰（Logistic Regression） | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Linear_Regression.md` |
 | 決定木（Decision Trees）・ランダムフォレスト | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Decision_Trees.md` |
+| ランダムフォレスト構築3要素（Bootstrapping・特徴量サブセット・Voting） | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Decision_Trees.md` |
+| RandomForestClassifier（feature_importances_・侵入検知への応用） | Supervised Learning / Security | `06_Concepts/AI_ML/Supervised_Learning/Decision_Trees.md` |
 | Naive Bayes（テキスト分類・スパムフィルタリング） | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Naive_Bayes.md` |
 | NLP テキスト前処理パイプライン（小文字化・トークン化・ストップワード除去・ステミング） | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Naive_Bayes.md` |
 | Bag-of-Words モデル（CountVectorizer・語彙構築・unigram/bigram） | Supervised Learning / NLP | `06_Concepts/AI_ML/Supervised_Learning/Feature_Extraction.md` |
@@ -176,6 +178,8 @@
 | PCA（主成分分析・次元削減・可視化） | Unsupervised Learning | `06_Concepts/AI_ML/Unsupervised_Learning/PCA.md` |
 | 異常検知（Isolation Forest・One-Class SVM・Autoencoder） | Unsupervised Learning | `06_Concepts/AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
 | 異常検知のセキュリティ応用（ネットワーク侵入検知・ログ解析） | Unsupervised Learning | `06_Concepts/AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
+| Random Forestによる教師あり侵入検知（正常ラベルあり・多クラス分類） | Unsupervised Learning / Security | `06_Concepts/AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
+| NSL-KDDデータセット特徴量構造（ネットワーク侵入検知ベンチマーク） | Security / Dataset | `06_Concepts/AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
 
 ### 強化学習
 
