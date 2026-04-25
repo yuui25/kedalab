@@ -223,8 +223,13 @@
 | ResNet アーキテクチャ選択基準（18/50/101 の速度-精度トレードオフ） | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | fc.in_features 動的読み取りパターン（ResNet variants 間の互換性確保） | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | PyTorch 訓練ループ（CrossEntropyLoss・Adam・zero_grad→backward→step） | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| model.train() と model.eval() の切り替え（Dropout・BN の訓練/推論モード） | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| エポックごとのメトリクス記録パターン（history dict で訓練曲線を後から描く） | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| predict() を evaluate から分離する設計パターン | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| 訓練曲線の読み方（収束・横ばい・過学習・勾配消失の診断） | Deep Learning / 評価 | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | torch.jit.script によるモデルのシリアライズ（TorchScript 保存） | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | 推論時の model.eval() + torch.no_grad() パターン | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| ハイパーパラメータ集約パターン（スクリプト冒頭の定数化で実験管理） | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | RNN・LSTM・GRU（系列データ・時系列） | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/RNN.md` |
 
 ### 生成AI

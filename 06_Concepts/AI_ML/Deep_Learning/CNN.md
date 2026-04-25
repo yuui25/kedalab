@@ -376,13 +376,22 @@ class MalwareClassifier(nn.Module):
 
 ```python
 import torch
+import time
 
-def train(model, train_loader, n_epochs):
-    model.train()
+def compute_accuracy(n_correct, n_total):
+    return round(100 * n_correct / n_total, 2)
+
+def train(model, train_loader, n_epochs, verbose=False):
+    model.train()   # ← Dropout・BatchNorm を訓練モードに切り替える（必須）
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters())
+
+    # エポックごとのメトリクスを記録しておく（後で訓練曲線を描くため）
+    history = {"accuracy": [], "loss": []}
+
     for epoch in range(n_epochs):
         running_loss, n_total, n_correct = 0, 0, 0
+        t0 = time.time()
         for inputs, labels in train_loader:
             optimizer.zero_grad()
             outputs = model(inputs)
@@ -390,37 +399,125 @@ def train(model, train_loader, n_epochs):
             loss.backward()
             optimizer.step()
             _, predicted = outputs.max(1)
-            n_total += labels.size(0)
-            n_correct += predicted.eq(labels).sum().item()
-        print(f"Epoch {epoch+1}: Acc={100*n_correct/n_total:.2f}% Loss={running_loss/len(train_loader):.4f}")
+            n_total       += labels.size(0)
+            n_correct     += predicted.eq(labels).sum().item()
+            running_loss  += loss.item()
+
+        epoch_acc  = compute_accuracy(n_correct, n_total)
+        epoch_loss = running_loss / len(train_loader)
+        history["accuracy"].append(epoch_acc)
+        history["loss"].append(epoch_loss)
+
+        if verbose:
+            elapsed = int((time.time() - t0) * 1000)
+            print(f"[Epoch {epoch+1}/{n_epochs}] Acc: {epoch_acc:.2f}%  "
+                  f"Loss: {epoch_loss:.4f}  ({elapsed} ms)")
+    return history
 ```
 
+- **`model.train()` は訓練開始時に必ず呼ぶ**。`model.eval()` を使った後に再度訓練するケースで忘れやすい
 - `optimizer.zero_grad()` → `loss.backward()` → `optimizer.step()` の順序は必須
-- `outputs.max(1)` で予測クラスのインデックスを取得（`_` は max 値自体で不要）
+- `outputs.max(1)` で予測クラスのインデックスを取得（戻り値の第1要素は max 値自体で不要）
+- `compute_accuracy()` を独立させることで evaluate ループからも再利用できる
+- `history` dict にエポックごとの値を貯めておくと、訓練後に曲線を描いて収束・過学習を診断できる
 
-**ステップ5：モデル保存と推論**
+**ステップ5：単体推論と評価**
 
 ```python
-# 保存：TorchScript 形式（デプロイに適した形式）
-def save_model(model, path):
-    model_scripted = torch.jit.script(model)
-    model_scripted.save(path)
+def predict(model, data):
+    """バッチデータに対する予測クラスを返す（evaluate から分離しておくと再利用しやすい）"""
+    model.eval()
+    with torch.no_grad():
+        output = model(data)
+        _, predicted = torch.max(output, 1)
+    return predicted
 
-# 推論：勾配計算を無効化して高速化・メモリ節約
 def evaluate(model, test_loader):
+    """テストセット全体の accuracy を返す"""
     model.eval()
     n_correct, n_total = 0, 0
     with torch.no_grad():
         for data, target in test_loader:
-            _, predicted = torch.max(model(data), 1)
-            n_total += target.size(0)
+            predicted  = predict(model, data)
+            n_total   += target.size(0)
             n_correct += (predicted == target).sum().item()
-    return 100 * n_correct / n_total
+    return compute_accuracy(n_correct, n_total)
 ```
 
-- `model.eval()` は Dropout・BatchNorm を推論モードに切り替える（忘れると精度が落ちる）
-- `torch.no_grad()` は勾配グラフを作らずメモリ使用量を削減する
-- `torch.jit.script` でシリアライズするとデプロイ時に Python 環境が不要になる
+- `predict()` を分離することで、単一サンプルの推論・混同行列の作成・可視化など evaluate 以外の用途にも流用できる
+- `model.eval()` は Dropout・BatchNorm を推論モードに切り替える（忘れると精度が不安定になる）
+- `torch.no_grad()` は勾配グラフを生成せずメモリ使用量を削減する
+
+**ステップ6：モデルの保存**
+
+```python
+def save_model(model, path):
+    """TorchScript 形式で保存する（デプロイ時に Python 環境が不要になる）"""
+    model_scripted = torch.jit.script(model)
+    model_scripted.save(path)
+```
+
+- `torch.jit.script` はモデルのコードをコンパイルして保存する。`torch.save(model.state_dict(), ...)` より移植性が高い
+- ロード時は `torch.jit.load(path)` を使う（クラス定義が不要）
+
+**ステップ7：訓練曲線の可視化と診断**
+
+```python
+import matplotlib.pyplot as plt
+
+def plot_history(history, metric="accuracy"):
+    """history dict から訓練曲線を描く"""
+    data = history[metric]
+    plt.figure()
+    plt.plot(range(1, len(data) + 1), data, marker='o')
+    plt.title(f"Training {metric.capitalize()} per Epoch")
+    plt.xlabel("Epoch")
+    plt.ylabel(metric.capitalize())
+    plt.grid(True)
+    plt.show()
+
+# 使い方
+plot_history(history, "accuracy")
+plot_history(history, "loss")
+```
+
+**訓練曲線の読み方：**
+
+| 曲線の形状 | 診断 | 対処 |
+|-----------|------|------|
+| Accuracy が右肩上がりで収束 | 正常な学習 | エポック数を増やして上限を探る |
+| Accuracy が途中で横ばい | 学習率が低い・容量不足 | lr を上げる・hidden_size を増やす |
+| 終盤で Accuracy が下がる | 過学習の兆候 | Dropout 追加・Data Augmentation |
+| Loss が下がらない | 勾配消失・lr が大きすぎる | lr を小さくする・BN を追加する |
+| 訓練精度 ≫ テスト精度（8% 以上乖離） | 過学習 | 正則化・データ拡張・freeze 解除の見直し |
+
+**ステップ8：ハイパーパラメータの集約パターン**
+
+実験を繰り返す場合、パラメータをスクリプト冒頭に集約しておくと変更箇所が一目でわかる：
+
+```python
+# ── ハイパーパラメータ（ここだけ変えれば実験できる）──
+DATA_PATH          = "./data/"
+N_EPOCHS           = 10
+TRAIN_BATCH_SIZE   = 512
+TEST_BATCH_SIZE    = 1024
+HIDDEN_LAYER_SIZE  = 1000
+MODEL_SAVE_PATH    = "classifier.pth"
+
+# ── パイプライン ──
+train_loader, test_loader, n_classes = load_datasets(
+    DATA_PATH, TRAIN_BATCH_SIZE, TEST_BATCH_SIZE)
+model    = MalwareClassifier(n_classes, hidden_size=HIDDEN_LAYER_SIZE)
+history  = train(model, train_loader, N_EPOCHS, verbose=True)
+save_model(model, MODEL_SAVE_PATH)
+accuracy = evaluate(model, test_loader)
+print(f"Test accuracy: {accuracy}%")
+plot_history(history, "accuracy")
+plot_history(history, "loss")
+```
+
+- パラメータを定数として宣言することで、同じコードで異なる設定を試せる
+- `verbose=True` にすると各エポックの精度・損失・時間が出力される（訓練中の監視用）
 
 **性能参考値（Malimg・10 エポック・全層 freeze・Resize 75×75）：**
 
