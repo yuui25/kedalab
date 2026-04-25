@@ -180,6 +180,9 @@
 | 異常検知のセキュリティ応用（ネットワーク侵入検知・ログ解析） | Unsupervised Learning | `06_Concepts/AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
 | Random Forestによる教師あり侵入検知（正常ラベルあり・多クラス分類） | Unsupervised Learning / Security | `06_Concepts/AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
 | NSL-KDDデータセット特徴量構造（ネットワーク侵入検知ベンチマーク） | Security / Dataset | `06_Concepts/AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
+| 多クラス攻撃カテゴリマッピング（DoS/Probe/Privilege/Access・map_attack関数） | Security / Dataset | `06_Concepts/AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
+| pd.get_dummies（pandas one-hot encoding・OneHotEncoderとの使い分け） | AI/ML 前処理 | `06_Concepts/AI_ML/Data_Transformation.md` |
+| encoded.join による特徴量行列の構築（カテゴリ+数値の結合） | AI/ML 前処理 | `06_Concepts/AI_ML/Data_Transformation.md` |
 
 ### 強化学習
 

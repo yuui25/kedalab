@@ -115,16 +115,58 @@
 **`attack` カラムの値例（二値化で使う場合）：**
 ```python
 # 正常/異常の二値ラベルに変換
-df["label"] = df["attack"].apply(lambda x: 0 if x == "normal" else 1)
+df['attack_flag'] = df['attack'].apply(lambda a: 0 if a == 'normal' else 1)
 ```
 
-**カテゴリ変数のエンコード（`protocol_type` 等）：**
+**多クラス攻撃カテゴリへのマッピング：**
+
+二値分類（正常 vs 異常）よりも粒度を上げ、攻撃の種類まで分類する場合に使う。
+NSL-KDD の攻撃カテゴリ定義は公式スキーマを参照：https://www.unb.ca/cic/datasets/nsl.html
+
+| ラベル値 | 攻撃カテゴリ | 特徴 |
+|---------|------------|------|
+| 0 | Normal | 正常トラフィック |
+| 1 | DoS | サービス妨害。大量パケットによる過負荷・接続枯渇 |
+| 2 | Probe | ポートスキャン・ネットワーク偵察。攻撃の前段として使われる |
+| 3 | Privilege Escalation | バッファオーバーフロー等による権限昇格 |
+| 4 | Access | 認証情報の推測・不正アクセス |
+
 ```python
-from sklearn.preprocessing import LabelEncoder
-le = LabelEncoder()
-for col in ["protocol_type", "service", "flag"]:
-    df[col] = le.fit_transform(df[col])
+# 各カテゴリに属する attack 値のリストは NSL-KDD 公式スキーマを参照して定義する
+# dos_attacks / probe_attacks / privilege_attacks / access_attacks の4リストを用意する
+
+def map_attack(attack, dos_attacks, probe_attacks,
+               privilege_attacks, access_attacks):
+    if attack in dos_attacks:           return 1
+    elif attack in probe_attacks:       return 2
+    elif attack in privilege_attacks:   return 3
+    elif attack in access_attacks:      return 4
+    else:                               return 0  # normal
+
+df['attack_map'] = df['attack'].apply(
+    lambda a: map_attack(a, dos_attacks, probe_attacks,
+                         privilege_attacks, access_attacks)
+)
 ```
+
+**カテゴリ変数のエンコードと特徴量行列の構築：**
+
+```python
+# protocol_type・service を one-hot encoding（順序関係を持たせない）
+features_to_encode = ['protocol_type', 'service']
+encoded = pd.get_dummies(df[features_to_encode])
+
+# NSL-KDD の数値特徴量（カテゴリ列・ラベル列を除いた統計値カラム群）と結合
+# 使用するカラムの完全リストは公式スキーマの numeric 列を参照
+numeric_features = [col for col in df.columns
+                    if col not in features_to_encode + ['attack', 'attack_flag',
+                                                         'attack_map', 'level']]
+
+train_set = encoded.join(df[numeric_features])
+multi_y = df['attack_map']
+```
+
+> `flag` 列は LabelEncoder より one-hot の方が望ましいが、探索段階では `get_dummies` でまとめて処理しても支障ない。本番 Pipeline では `OneHotEncoder` を使う → `../../Data_Transformation.md`
 
 ### 関連技術
 

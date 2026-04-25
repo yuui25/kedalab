@@ -37,11 +37,32 @@ df = pd.concat([df.drop('protocol', axis=1), encoded_df], axis=1)
 
 **何が起きているか：** `protocol` 列に `tcp`・`udp`・`icmp` の3種類があれば、`protocol_tcp`・`protocol_udp`・`protocol_icmp` の3列が生成される。各行はどれか1列だけ `1`、残りは `0` になる。
 
+**`pd.get_dummies` を使う簡易版（pandas）：**
+
+```python
+import pandas as pd
+
+# 複数列をまとめて one-hot encoding（sklearn 不要）
+features_to_encode = ['protocol_type', 'service']
+encoded = pd.get_dummies(df[features_to_encode])
+
+# 数値特徴量と結合して最終的な特徴量行列を作る
+train_set = encoded.join(df[numeric_features])
+```
+
+`get_dummies` は列名を `元の列名_カテゴリ値`（例: `protocol_type_tcp`）として自動生成する。`OneHotEncoder` より記述が短いが、推論時に訓練時と同じカラム構成を保証する仕組みがないため、本番環境・Pipeline 組み込みには `OneHotEncoder` が安全。
+
+| 手法 | 適したケース |
+|------|------------|
+| `pd.get_dummies` | 探索・前処理スクリプトの素早い記述 |
+| `sklearn.OneHotEncoder` | Pipeline 組み込み・推論時の列整合保証が必要な場合 |
+
 ### 注意点・落とし穴
 
 - **LabelEncoder を順序のないカテゴリに使わない。** モデルが誤った大小関係を学習する原因になる
 - **エンコード後のカラム名が変わる**ことに注意。後続の処理でカラム参照している場合はズレる
 - `handle_unknown='ignore'` オプションを付けると、学習時に見ていない未知カテゴリが来ても無視する（付けないとエラーになる）
+- `get_dummies` は訓練・テストでカテゴリの出現に差があると列数が一致しなくなる。`reindex(columns=train_columns, fill_value=0)` で揃える
 - エンコード後に変換が意味のある列になっているか確認する（自動変換を盲目的に信用しない）
 
 ---
