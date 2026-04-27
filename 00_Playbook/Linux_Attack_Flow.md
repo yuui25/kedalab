@@ -59,7 +59,7 @@ Linux と確定した上でこのファイルのStep 1以降を進める。
    - ヘッダー・フッター・ログインページ・`/api/health` 等にバージョンが表示されていないか確認
    - 判明したら即 `searchsploit [アプリ名] [バージョン]` で既知脆弱性を検索
    - CVE が見つかった場合、パストラバーサル / RCE 等の深刻な脆弱性が優先
-4. gobuster / ffuf でディレクトリ列挙
+4. gobuster / ffuf でディレクトリ列挙 → `../01_Reconnaissance/Web_Enumeration.md`（ディレクトリ・エンドポイントの列挙）
 5. **エンドポイントのIDやパラメータに連番・予測可能な値がないか確認** → IDOR の可能性
 6. vhost（仮想ホスト）のファジングを検討
 7. **JS ソースに難読化コードがある場合はデコードしてAPIエンドポイントを発見する**
@@ -243,6 +243,9 @@ GTFOBins で確認。標準バイナリ（find, vim, python等）に SUID が設
 
 → 詳細手順（スクリプト配置・引き金の引き方・失敗パターン）: `../03_Post_Access_Linux/PAM_Misconfig.md`
 → 原理（なぜ PAM session が root 権限で外部コマンドを呼ぶのか）: `../06_Concepts/PAM.md`
+
+**条件4が満たせない場合（www-data等でSSH再ログインが不可能な場合）：**
+この手法は使えない。SUID / Capabilities / sudo -l 等の別経路を探す。
 
 ### カーネルバージョンが古い場合
 

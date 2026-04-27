@@ -141,6 +141,7 @@ sqlite3 grafana.db "SELECT id, name, login, email, password, salt FROM user;"
 取得したハッシュを Hashcat (mode 10900) 形式に変換する：
 
 ```python
+# [Kali] 以下のスクリプトはKali（攻撃側）のマシンで実行する。ターゲット上では実行しない。
 import base64, binascii
 
 salt = b'[SALT_STRING]'

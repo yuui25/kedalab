@@ -38,15 +38,15 @@ python3 -c 'import pty; pty.spawn("/bin/bash")'
 # Step 2: TERMを設定する
 export TERM=xterm
 
-# Step 3: Ctrl+Z でバックグラウンドに落とす
-# （ここでローカルのKali端末に戻る）
+# Step 3: Ctrl+Z でncをバックグラウンドに落とす（ローカルKali端末に戻る）
 
-# Step 4: ローカルターミナルのエコー設定を変更
+# Step 4: [Kali] ローカル端末のエコー設定を変更する（入力が二重表示されなくなる）
 stty raw -echo
+# ← この後はキー入力がエコーされないため、画面が無応答に見えるが正常。そのまま fg と打つ
 
-# Step 5: フォアグラウンドに戻す
+# Step 5: [Kali] バックグラウンドのncをフォアグラウンドに戻す
 fg
-# Enter を1〜2回押すとシェルプロンプトが戻ってくる
+# Enterを1〜2回押すとシェルプロンプトが戻ってくる
 ```
 
 完了後の確認：`Ctrl+C` が機能し、プロンプトが `user@host:~$` 形式になる。

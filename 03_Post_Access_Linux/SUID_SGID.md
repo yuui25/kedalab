@@ -92,6 +92,10 @@ cp /tmp/passwd.bak /etc/passwd
 
 # 作成したアカウントでログイン
 su hacker
+
+# 作業完了後は必ず元に戻す（本番環境では必須）
+cp /etc/passwd /tmp/passwd.modified.bak  # 念のため修正後もバックアップ
+cp /tmp/passwd.bak /etc/passwd           # 元のファイルに戻す
 ```
 
 ---
@@ -110,6 +114,9 @@ su hacker
 - SUID が設定されていても、バイナリが特権操作をしない実装であれば悪用できない場合がある
 - `-p` オプションなしで bash を実行すると、シェルが実効UID をリセットしてしまう
 - NFS マウントされたファイルシステムでは `nosuid` オプションで SUID が無効化されることがある
+- **原状回復必須**：/etc/passwd の書き換えはシステムに永続的な変更を加える操作。
+  作業完了後は必ずバックアップから元に戻すこと（`cp /tmp/passwd.bak /etc/passwd`）。
+  CTFでは問題ないが、実際のペネトレストでは本番環境への影響が残るため事前承認が必要。
 
 ---
 

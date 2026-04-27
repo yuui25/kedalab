@@ -94,6 +94,9 @@ URLが `/data/3` や `/download/5` のような形式の場合：
 - レスポンスサイズが同じものが大量にある場合はフィルタリングが必要（`--exclude-length`）
 - vhost のファジングでは必ずベースドメインを `/etc/hosts` に登録してから実施する
 - HTTPS の場合は `-k` オプションで証明書チェックをスキップ
+- `--append-domain` は gobuster v3.2 以降のオプション。`gobuster --version` で確認し、
+  v3.2未満の場合はアップデートするか ffuf を代替として使う：
+  `ffuf -w [WORDLIST]:FUZZ -u http://[DOMAIN]/ -H "Host: FUZZ.[DOMAIN]" -fw [FILTER]`
 
 ---
 

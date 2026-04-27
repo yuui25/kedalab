@@ -204,6 +204,19 @@ hashcat -m 10900 hashes.txt /usr/share/wordlists/rockyou.txt --force
 
 ---
 
+## クラックが進まないときの判断フロー
+
+| 状況 | 次のアクション |
+|------|--------------|
+| rockyouで30分以上ヒットしない | ルール変更（`-r best64.rule` → `OneRuleToRuleThemAll.rule`）を試す |
+| ルール変更後もヒットしない | そのハッシュは強固と判断し、同DBの別ユーザーのハッシュを試す |
+| 全ユーザーがヒットしない | ハッシュクラックは一時中断し、別の侵入経路（認証情報使い回し・別サービスへのアクセス）を探す |
+| GPUなしのVM環境で極端に遅い | `--force` オプションを追加。それでも遅い場合はCPU専用として割り切り辞書を絞る |
+
+**「クラックできなかった＝詰まり」ではない。** 認証情報が取れなければ別の経路を探すのがペネトレの鉄則。
+
+---
+
 ## 関連技術
 - Kerberoasting ハッシュの取得 → `../04_Post_Access_Windows_AD/Kerberos_Attacks/Kerberoasting.md`
 - ASREPRoasting ハッシュの取得 → `../04_Post_Access_Windows_AD/Kerberos_Attacks/ASREPRoasting.md`
