@@ -136,6 +136,7 @@ curl -s "http://[TARGET]/moduleinterface.php?mact=News,m1_,default,0&m1_idlist=a
 
 **Python でのパスワードクラック（ソルト付きMD5）：**
 ```python
+# [Kali] 以下はKali（攻撃側）のマシンで実行する
 import hashlib
 
 salt   = "[取得したソルト]"
@@ -160,6 +161,9 @@ with open("/usr/share/wordlists/rockyou.txt", errors="ignore") as f:
 ---
 
 ## 関連技術
-- 認証情報が取得できた → `../Credential_Discovery.md`
-- MD5+Salt ハッシュのクラック → `../../05_Tools_Reference/Hashcat.md`（mode 20）
-- 管理者パネルにアクセスできた → Webアプリ固有の機能を調査
+
+- 前：ログインフォームまたはURLパラメータを発見 → `../../01_Reconnaissance/Web_Enumeration.md`
+- 後：認証情報が取得できた → `../Credential_Discovery.md`
+- 後：MD5+Salt ハッシュのクラック → `../../05_Tools_Reference/Hashcat.md`（mode 20）
+- 後：管理者パネルにアクセスできた → Webアプリ固有の機能を調査。コマンドインジェクション等を試す → `Command_Injection.md`
+- 関連：XSS（同じ入力フィールドの脆弱性） → `XSS.md`

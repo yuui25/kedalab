@@ -34,6 +34,7 @@ strings capture.pcap | grep -i "user\|pass\|login\|auth" | head -50
 - PCAPが大きい場合 `strings` は GB 単位でも数秒で終わるが、誤マッチが多いため補助手段として使う
 - `https` トラフィックは復号できない（鍵がない限り）。平文は `http` / `ftp` / `telnet` / `pop3` / `imap` など
 - 認証情報を拾ったら **日付・ホスト名もメモしておく**。古すぎる PCAP のパスワードは現在変更されている可能性
+- → 取得した認証情報の確認手順：このファイル末尾「認証情報を取得したら必ず試すこと」を参照
 
 ---
 
@@ -60,6 +61,7 @@ cat users.bat
 - SYSVOL はドメイン参加ユーザーなら誰でも読めるのが既定。低権限アカウントでの横展開の糸口
 - `findstr /si password *.xml *.ini *.txt` を Windows 側で実行するとまとめて拾える（対応する Linux 側は `grep -risE 'pass(word)?='`）
 - **スケジュールタスク XML** / **スクリプト実行時の引数** にパスワードが渡されている場合もあるので、Groups.xml 以外も全部舐める
+- → 取得した認証情報の確認手順：このファイル末尾「認証情報を取得したら必ず試すこと」を参照
 
 ---
 
@@ -83,6 +85,7 @@ ldapsearch ... "(objectClass=user)" sAMAccountName info description \
 - `info` は GUI の「説明」欄とは別の目立たないフィールド。見落とされやすい分だけ平文パスワードが残りやすい
 - 一時パスワードが書かれていても `userAccountControl` に `PASSWORD_EXPIRED` が立っていないか確認。既に使われなくなっている可能性
 - `description` / `info` が暗号文っぽい場合、別フィールドに鍵が書かれていることもある（例: `extensionAttribute1`）
+- → 取得した認証情報の確認手順：このファイル末尾「認証情報を取得したら必ず試すこと」を参照
 
 ---
 
@@ -100,6 +103,7 @@ ldapsearch ... "(objectClass=user)" sAMAccountName info description \
 - `web.config` / `appsettings.json` / `.env` / `docker-compose.yml` は最優先で確認する（バイナリ解析より前）
 - .NET バイナリは `strings` でも見つかることが多いが、UTF-16LE エンコードなので `strings -e l` を併用
 - 見つかった認証情報が開発用で接続先が `localhost` や内部ホスト → そのホスト名が DNS で引けるか確認（パストラバーサル等で `/etc/hosts` を拾うと分かることがある）
+- → 取得した認証情報の確認手順：このファイル末尾「認証情報を取得したら必ず試すこと」を参照
 
 ---
 
@@ -157,6 +161,7 @@ print(f'sha256:10000:{base64.b64encode(salt).decode()}:{base64.b64encode(hash_by
 - salt が別カラムに保存されていることが多い。必ずセットで取得する
 - admin アカウントのハッシュが強固でクラックできなくても、一般ユーザーのハッシュがクラックできることがある
 - パスワードを取得できたら必ず他サービス（SSH, FTP, 管理画面等）でも試す（使い回し確認）
+- → 取得した認証情報の確認手順：このファイル末尾「認証情報を取得したら必ず試すこと」を参照
 
 ---
 
@@ -190,6 +195,7 @@ gpp-decrypt '[cpassword 属性の値]'
 - `action="U"` は既存アカウントの更新（パスワード変更）を意味する。現在も有効なパスワードの可能性が高い
 - `Groups.xml` 以外にも GPP 認証情報が保存されるファイルがある: `Services.xml`, `ScheduledTasks.xml`, `Printers.xml`, `Drives.xml` — いずれも同様に `cpassword` を含む可能性がある
 - 取得したアカウントが低権限でも、そのアカウントで LDAP・SMB・BloodHound の認証が通るため、AD全体の列挙が一気に進む
+- → 取得した認証情報の確認手順：このファイル末尾「認証情報を取得したら必ず試すこと」を参照
 
 → 詳細な取得手順: `../../01_Reconnaissance/SMB_Enumeration.md`（GPPセクション）
 
@@ -253,6 +259,7 @@ su [USERNAME]
 - DB_PASSWORD と OSユーザーのパスワードが同一になっているのは設定ミス（パスワード使い回し）だが、実際に多い
 - `.env` が見つからない場合は `config.php`, `database.yml`, `appsettings.json`, `docker-compose.yml` 等も確認する
 - アプリケーションによっては `.env.production` / `.env.local` 等の派生ファイルが存在する
+- → 取得した認証情報の確認手順：このファイル末尾「認証情報を取得したら必ず試すこと」を参照
 
 ---
 

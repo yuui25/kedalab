@@ -74,5 +74,17 @@ done
 
 ---
 
+## 刺さらなかったとき
+
+- **IDがUUID形式で連番推測が困難な場合** → 他のエンドポイントのレスポンスJSONに `user_id` / `file_id` / `object_id` 等の有効なIDが漏れていないか確認する（例：自分のプロフィールAPIのレスポンスに他ユーザーのIDが含まれる場合がある）
+- **全IDに403が返る場合** → CookieやAuthorizationヘッダーの渡し方を確認する。セッション切れやトークン不足の可能性がある
+- **存在するIDに全て404が返る場合** → エンドポイントパスの推測が間違っている。gobusterで正しいパスを再確認する → `../../01_Reconnaissance/Web_Enumeration.md`
+
+---
+
 ## 関連技術
-- PCAPファイルが取得できた → `../Credential_Discovery.md`
+
+- 前：Web列挙でIDを含むURLを発見 → `../../01_Reconnaissance/Web_Enumeration.md`
+- 後：PCAPファイルが取得できた → `../Credential_Discovery.md`
+- 後：バイナリが取得できた → `../Binary_Analysis.md`
+- 関連：パストラバーサル（同じ「ファイルアクセス」系の脆弱性） → `Path_Traversal.md`
