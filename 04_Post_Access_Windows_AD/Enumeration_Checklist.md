@@ -4,6 +4,26 @@
 
 ---
 
+## 接続直後に打つコマンド（最初の3手）
+
+シェルを取ったら何より先にこの3つを実行する。後続のステップ選択（CVE選択・BloodHound優先度）に直結する。
+
+```powershell
+# 1. 自分が誰か・どの権限を持っているか（特権トークンの確認）
+whoami /all
+
+# 2. OSバージョン・ビルド番号（CVE選択に直結）
+Get-ComputerInfo | Select-Object WindowsProductName, OSDisplayVersion, WindowsBuildLabEx
+
+# 3. ネットワーク構成（他ホストへの経路・DNSサーバーの確認）
+ipconfig /all
+```
+
+この3つを打ったら `whoami /all` の **Privileges** 欄を確認して Step 1 へ。  
+BloodHound（Step 2）が最優先の次のアクション。
+
+---
+
 ## Step 0: システム情報の確認（接続直後に実行）
 
 シェルを取ったら最初に OS のバージョン・ビルド番号・ドメイン所属を確認する。CVE の適用可否や攻撃手法の選択に直結する。
