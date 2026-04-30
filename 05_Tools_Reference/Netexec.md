@@ -138,10 +138,10 @@ nxc mssql [IP] -u [USER] -p '[PASSWORD]' --local-auth --rid-brute \
 **出力例：**
 
 ```
-jamie.dunn
-jane.smith
-alice.jones
-adam.scott
+firstname1.lastname1
+firstname2.lastname2
+firstname3.lastname3
+...
 ```
 
 **着眼点 — 取得後にすること：**
@@ -163,7 +163,21 @@ nxc winrm [IP] -u users -p '[PASSWORD]' --continue-on-success
 
 **刺さらなかったとき：**
 - `--rid-brute` で `ACCESS_DENIED` になる → 権限が不足しているか、RPC/Windows セキュリティへのアクセスが制限されている。impacket-lookupsid を試す（`../02_Initial_Access/Protocol_Exploitation.md` RPC セクション参照）
-- ドメイン名が不明で grep にマッチしない → まず `nxc smb [IP] -u [USER] -p '[PASSWORD]'` の出力でドメイン名を確認する
+- ドメイン名が不明で grep にマッチしない → まず `nxc smb [IP] -u [USER] -p '[PASSWORD]'` の出力でドメイン名（NetBIOS 名）を確認する。多くの場合 `domain:` ラベルの後ろに表示される
+- **正規表現 `\w+\.\w+` がマッチしない（出力が空のまま）** → 組織のユーザー命名規則が `firstname.lastname` 形式以外（例：`jdunn`・`user001`・`j-dunn` 等）の場合、上記の正規表現は刺さらない。以下のように受け口を広げる：
+
+```bash
+# . を含まない命名規則も含めて広く受ける（DOMAIN\任意の連続文字）
+nxc mssql [IP] -u [USER] -p '[PASSWORD]' --local-auth --rid-brute \
+  | grep -oP '[DOMAIN]\\\S+' | cut -d'\' -f2 | tee users
+
+# 「SidTypeUser」行のみを抽出してから cut（マシンアカウント `$` 終端を除外）
+nxc smb [IP] -u [USER] -p '[PASSWORD]' --rid-brute \
+  | grep 'SidTypeUser' | grep -oP '[DOMAIN]\\\S+' | cut -d'\' -f2 \
+  | grep -v '\$$' | tee users
+```
+
+> **マシンアカウント（末尾 `$`）はパスワードスプレー対象から除外する。** マシンアカウントのパスワードはランダム生成120文字で辞書攻撃が通らないため、混じっているとスプレーのノイズになる。`grep -v '\$$'` で落とす。
 
 ---
 

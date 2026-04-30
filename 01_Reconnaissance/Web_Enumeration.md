@@ -78,7 +78,7 @@ gobuster dir -u http://[IP] -w [WORDLIST] -x php,txt,html,bak -o gobuster_ext.tx
 gobuster vhost -u http://[DOMAIN] -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt \
   --append-domain -o vhost_fuzz.txt
 ```
-→ 発見したvhostは `/etc/hosts` に追加して再調査する
+→ 発見したvhostは `/etc/hosts` に追加して再調査する（原理 → `../06_Concepts/Hosts_File_For_AD.md`）
 
 ### エンドポイントの連番・IDを確認する（IDOR）
 
@@ -97,6 +97,25 @@ URLが `/data/3` や `/download/5` のような形式の場合：
 - `--append-domain` は gobuster v3.2 以降のオプション。`gobuster --version` で確認し、
   v3.2未満の場合はアップデートするか ffuf を代替として使う：
   `ffuf -w [WORDLIST]:FUZZ -u http://[DOMAIN]/ -H "Host: FUZZ.[DOMAIN]" -fw [FILTER]`
+
+### 刺さらなかったとき・症状別の対処
+
+**ファジング中にブラウザのログインセッションが切れる / 数回に1回しかログインできない：**
+
+| 観測される症状 | 推定原因 | 対処 |
+|--------------|---------|------|
+| ファジング開始後にブラウザでログアウトされる | ロードバランサー / WAF が IP 単位でレート制限を発動。同一IPの大量リクエストでセッションを切る | スレッド数を絞る（`-t 5` 以下） / 遅延を入れる（`--delay 200ms`） |
+| 大量の `429 Too Many Requests` | アプリ層のレート制限 | スレッド数を絞る + リクエスト間隔を空ける |
+| 大量の `503` / `502` | バックエンドが詰まっている / WAF の throttle | ファジング停止して数分待ってから再開、ワードリストを短いものに変える |
+| ブラウザでログインしても即ログアウト | セッションストアの IP/UA バインディング | ファジング停止中にブラウザで操作し、別IP からは触らない |
+| 一定回数失敗で IP ブロック | WAF / IPS の自動遮断 | 停止して回避策（IP ローテーション・遅延）を考える。検知された証跡として記録 |
+
+**ファジングと手動操作は分離する。** ロードバランサー配下のアプリでは、ファジング中の手動操作はセッションが切れる前提で動く。**まず手動でサイト構造把握 → ファジングはバックグラウンド走行 → 必要なら停止して手動再開**、の順序で進める。
+
+```bash
+# 例：負荷を抑えたファジング設定
+gobuster dir -u http://[IP] -w [WORDLIST] -t 5 --delay 200ms -o gobuster_lowrate.txt
+```
 
 ---
 

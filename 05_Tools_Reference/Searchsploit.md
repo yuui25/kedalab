@@ -325,7 +325,39 @@ searchsploit -w grafana 8.0
 | **NVD** | https://nvd.nist.gov/vuln/search | CVSSスコア・影響バージョン・公式パッチ情報 |
 | **GitHub** | https://github.com/ | 新しめの PoC（Exploit-DB未掲載のものが多い） |
 | **PacketStorm** | https://packetstormsecurity.com/ | Exploit-DB にないエクスプロイト・ツール |
+| **ベンダーセキュリティブログ** | Akamai / SpecterOps / Trustedsec / Semperis / MSRC 等 | 公開直後の新規CVE・研究者記事 |
+| **X（旧Twitter）** | x.com で `CVE-XXXX-XXXXX` 検索 | PoC公開の最速一次情報 |
 | **GreyNoise / Shodan** | shodan.io | 実環境での稼働状況・バージョン分布 |
+
+### searchsploit が0件のときのフロー
+
+OS / 製品が**リリースから1年以内**・**最新ビルド**・**研究者公開直後の脆弱性**は Exploit-DB に未掲載なことが多い。以下の順で探す：
+
+```
+searchsploit → 0件
+      ↓
+① NVD で CVE と影響範囲を確定する（製品名 + バージョンで検索）
+      ↓
+② GitHub で "CVE-202X-XXXXX" / "CVE-202X-XXXXX PoC" を検索
+   → Star数・最終コミット日・README の前提条件を確認
+      ↓
+③ 該当CVE を発見した研究機関のブログを直接読む
+   （Akamai / SpecterOps / Trustedsec / Semperis / MSRC 等）
+      ↓
+④ X で CVE 番号を検索（一次情報・追加 PoC・回避策が出ることが多い）
+      ↓
+⑤ それでも見つからなければ「未公開CVE」または「PoCが流通していないCVE」
+   → 該当機能の公式仕様・関連 OSS のソースコードを読んで自前で PoC を組む判断
+```
+
+**新しい OS / 製品で CVE を探すときの検索キーワード例：**
+
+| 状況 | 検索パターン |
+|------|------------|
+| 新しい Windows Server / クライアント | `"Windows Server [年]" CVE [新機能名] privilege escalation` |
+| AD の新機能（dMSA / Authentication Silos 等） | `"[機能名]" abuse exploit github` |
+| 新しい Linux カーネル | `"linux [バージョン]" CVE LPE` |
+| 新しい Web フレームワーク | `"[フレームワーク名] [バージョン]" RCE PoC` |
 
 **GitHub での PoC 検索：**
 
