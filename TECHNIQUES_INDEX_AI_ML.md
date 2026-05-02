@@ -128,6 +128,9 @@ AI・機械学習・AI Red Teaming に関する技術・概念ノートの横断
 | RAG（Retrieval-Augmented Generation） | Generative AI | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
 | Fine-tuning・LoRA | Generative AI | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
 | プロンプトインジェクション攻撃（直接型・間接型） | Generative AI / Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
+| プロンプトインジェクションの構造的根拠（システム/ユーザープロンプト単一テキスト結合・LLMに境界識別能力なし） | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
+| マルチターン会話コンテキストを利用した段階的プロンプト操作 | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
+| マルチモーダルプロンプトインジェクション（画像・音声・動画経由のテキストフィルター回避） | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
 | Jailbreak — LLM ガードレール迂回（耐性による難易度変化・多層防御との連鎖） | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
 | LLM OWASP Top 10 分類フレームワーク（LLM01〜LLM10・着火条件・連鎖パターン） | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
 | Sensitive Information Disclosure — Fine-tuning 済みモデルの学習データ漏洩 | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
