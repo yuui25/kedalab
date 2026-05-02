@@ -124,6 +124,15 @@ AI・機械学習・AI Red Teaming に関する技術・概念ノートの横断
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
 | LLM アプリ偵察フェーズの5カテゴリ（モデル識別・アーキテクチャ・入力処理・出力制約・セーフガード） | LLM Reconnaissance | `07_AI_Red_Teaming/01_Reconnaissance/LLM_Reconnaissance.md` |
+| 直接型プロンプトインジェクション — 古典手法（Ignore all previous instructions）と耐性確認 | LLM Prompt Injection | `07_AI_Red_Teaming/02_LLM_Prompt_Injection/Direct_Prompt_Injection.md` |
+| システムプロンプト漏洩 戦略1: ルール書き換え＋権威主張（The last rule is / I am an admin user） | LLM Prompt Injection | `07_AI_Red_Teaming/02_LLM_Prompt_Injection/Direct_Prompt_Injection.md` |
+| システムプロンプト漏洩 戦略2: コンテキスト切り替え（詩・物語・劇への誘導） | LLM Prompt Injection | `07_AI_Red_Teaming/02_LLM_Prompt_Injection/Direct_Prompt_Injection.md` |
+| システムプロンプト漏洩 戦略3: 翻訳（指示→翻訳対象への文脈シフト） | LLM Prompt Injection | `07_AI_Red_Teaming/02_LLM_Prompt_Injection/Direct_Prompt_Injection.md` |
+| システムプロンプト漏洩 戦略4: スペルチェック（指示→校正対象への文脈シフト） | LLM Prompt Injection | `07_AI_Red_Teaming/02_LLM_Prompt_Injection/Direct_Prompt_Injection.md` |
+| システムプロンプト漏洩 戦略5: 要約・繰り返し（TL;DR / Summarize / 構文的手がかり） | LLM Prompt Injection | `07_AI_Red_Teaming/02_LLM_Prompt_Injection/Direct_Prompt_Injection.md` |
+| システムプロンプト漏洩 戦略6: エンコーディング（Base64 / ROT13 — 信頼性低）| LLM Prompt Injection | `07_AI_Red_Teaming/02_LLM_Prompt_Injection/Direct_Prompt_Injection.md` |
+| システムプロンプト漏洩 戦略7: 間接的抽出（部分情報の積み重ねによるフィルタ迂回） | LLM Prompt Injection | `07_AI_Red_Teaming/02_LLM_Prompt_Injection/Direct_Prompt_Injection.md` |
+| LLM ビジネスロジック操作（価格・条件のルール書き換えによる不正利益獲得） | LLM Prompt Injection | `07_AI_Red_Teaming/02_LLM_Prompt_Injection/Direct_Prompt_Injection.md` |
 | LLM フィンガープリンティング（LLMmap — 8クエリの応答分析でモデル種別を推定） | LLM Reconnaissance | `07_AI_Red_Teaming/01_Reconnaissance/LLM_Reconnaissance.md` |
 | LLM プローブクエリによるアーキテクチャ特定（RAG / Function Calling / プラグイン有無） | LLM Reconnaissance | `07_AI_Red_Teaming/01_Reconnaissance/LLM_Reconnaissance.md` |
 | LLM ガードレール強度・目的外クエリ反応の確認手法 | LLM Reconnaissance | `07_AI_Red_Teaming/01_Reconnaissance/LLM_Reconnaissance.md` |
