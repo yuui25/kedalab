@@ -123,6 +123,10 @@ AI・機械学習・AI Red Teaming に関する技術・概念ノートの横断
 
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
+| LLM アプリ偵察フェーズの5カテゴリ（モデル識別・アーキテクチャ・入力処理・出力制約・セーフガード） | LLM Reconnaissance | `07_AI_Red_Teaming/01_Reconnaissance/LLM_Reconnaissance.md` |
+| LLM フィンガープリンティング（LLMmap — 8クエリの応答分析でモデル種別を推定） | LLM Reconnaissance | `07_AI_Red_Teaming/01_Reconnaissance/LLM_Reconnaissance.md` |
+| LLM プローブクエリによるアーキテクチャ特定（RAG / Function Calling / プラグイン有無） | LLM Reconnaissance | `07_AI_Red_Teaming/01_Reconnaissance/LLM_Reconnaissance.md` |
+| LLM ガードレール強度・目的外クエリ反応の確認手法 | LLM Reconnaissance | `07_AI_Red_Teaming/01_Reconnaissance/LLM_Reconnaissance.md` |
 | Transformerアーキテクチャ・Self-Attention | Generative AI | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
 | LLM（大規模言語モデル）・GPT系・BERT系 | Generative AI | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
 | RAG（Retrieval-Augmented Generation） | Generative AI | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
