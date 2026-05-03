@@ -127,7 +127,7 @@ searchsploit --nmap nmap_allports.xml
 
 発見した機能・エラーから脆弱性クラスを特定する汎用フロー（searchsploit に限らない）は以下を参照：
 
-→ `../00_Playbook/Unknown_Tech_Research.md`
+→ `../00_Playbook/01_Unknown_Tech_Research.md`
 
 ---
 

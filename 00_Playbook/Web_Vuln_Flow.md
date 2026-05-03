@@ -66,6 +66,7 @@ gobuster vhost -u http://TARGET -w /usr/share/seclists/Discovery/DNS/subdomains-
 | JSソースが難読化されている | JS解析 → 隠しAPIの発見 | `../02_Initial_Access/Web_Vulnerabilities/JS_Obfuscation.md` |
 | XMLファイルのアップロード機能がある | XXE（ファイル読み込み・SSRF転用・Blind OOB） | `../02_Initial_Access/Web_Vulnerabilities/XXE.md` |
 | XSLTファイルのアップロード・選択機能がある / XML+XSLTを組み合わせた変換機能がある | XSLTインジェクション（フィンガープリント → XXE-via-XSLT / PHP拡張 / Java拡張） | `../02_Initial_Access/Web_Vulnerabilities/XSLT_Injection.md` |
+| **上のどれにも当てはまらない機能に当たった** | 機能を観察 → 英語で言語化 → 脆弱性クラスを特定するフロー | `01_Unknown_Tech_Research.md` |
 
 **確認の進め方：**
 - Burp Suiteで全リクエストをキャプチャしながら操作する

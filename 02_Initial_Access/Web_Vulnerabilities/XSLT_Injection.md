@@ -38,6 +38,8 @@
 
 **① プロセッサのフィンガープリント（最初に必ず実施）**
 
+> **操作の前提**：アプリがXMLとXSLTを両方アップロードする仕組みの場合、**元のXMLファイルはそのまま使い、XSLTファイルだけを差し替えてアップロードする**。以降の②〜⑤も同様。
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
@@ -61,7 +63,7 @@
 
 | 出力値 | 意味 | 次にやること |
 |--------|------|------------|
-| `Vendor URL: http://xmlsoft.org/XSLT/` | libxslt（C）。PHP連携の場合もある | ② → ④ → ③ の順で試す |
+| `Vendor URL: http://xmlsoft.org/XSLT/` | libxslt（C）。PHP連携の場合もある | ② → ④ → ③ の順で試す（③の `document()` はlibxsltでほぼブロックされるため最後） |
 | `Vendor: SAXON` またはバージョン番号（HE/PE/EE付き）| Saxon（Java）。バージョン番号でCVEを確認 | searchsploit / NVD でバージョン+CVEを確認。③ `document()` / `unparsed-text()` を試す |
 | `Vendor: Apache Software Foundation` | Xalan（Java） | ⑤ Java拡張要素（`rt:exec`）を試す |
 | `Vendor: Microsoft` | .NET XslCompiledTransform | `msxsl:script` 拡張（C#コード埋め込み）を試す |
@@ -94,7 +96,14 @@ XSLTファイル自体のDOCTYPEでエンティティを宣言することでフ
 
 `/etc/passwd` の内容が取得できたら以下の順で展開する。
 
-1. **有効なユーザーを特定する**：末尾フィールドがシェル（`/bin/bash` 等）で、ホームディレクトリがある行を探す。`/usr/sbin/nologin` / `/bin/false` のユーザーは除外。
+1. **有効なユーザーを特定する**：`/etc/passwd` は `username:x:uid:gid:comment:home:shell` の7フィールド構成。末尾（7番目）がシェルで、6番目がホームディレクトリ。
+
+   ```
+   alice:x:1001:1001::/home/alice:/bin/bash     ← 有効（/bin/bash）
+   www-data:x:33:33::/var/www:/usr/sbin/nologin ← 除外（nologin）
+   root:x:0:0:root:/root:/bin/bash              ← 有効（rootは特に重要）
+   ```
+
 2. **有効ユーザーの資産を読む**：
    - `file:///home/USERNAME/.ssh/id_rsa` — SSH 秘密鍵（あれば直接ログインへ）
    - `file:///home/USERNAME/.bash_history` — 過去コマンドに認証情報が残ることがある
