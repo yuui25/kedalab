@@ -64,6 +64,8 @@ gobuster vhost -u http://TARGET -w /usr/share/seclists/Discovery/DNS/subdomains-
 | 外部URLを受け付けるパラメータ | SSRF | `../02_Initial_Access/Web_Vulnerabilities/SSRF.md` |
 | APIが `host`/`ip`/`cmd` 等を受け取る | OSコマンドインジェクション | `../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md` |
 | JSソースが難読化されている | JS解析 → 隠しAPIの発見 | `../02_Initial_Access/Web_Vulnerabilities/JS_Obfuscation.md` |
+| XMLファイルのアップロード機能がある | XXE（ファイル読み込み・SSRF転用・Blind OOB） | `../02_Initial_Access/Web_Vulnerabilities/XXE.md` |
+| XSLTファイルのアップロード・選択機能がある / XML+XSLTを組み合わせた変換機能がある | XSLTインジェクション（フィンガープリント → XXE-via-XSLT / PHP拡張 / Java拡張） | `../02_Initial_Access/Web_Vulnerabilities/XSLT_Injection.md` |
 
 **確認の進め方：**
 - Burp Suiteで全リクエストをキャプチャしながら操作する

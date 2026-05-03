@@ -58,6 +58,8 @@
 | ハッシュ形式の特定（hashid / 形式文字列の読み方 / --example-hashes） | Initial Access | `05_Tools_Reference/Hashcat.md` |
 | Flask / Werkzeug PBKDF2 ハッシュのクラック（mode 10000 変換） | Initial Access | `05_Tools_Reference/Hashcat.md` |
 | SSRF（サーバーサイドリクエストフォージェリ） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/SSRF.md` |
+| XXE（XML外部エンティティインジェクション） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XXE.md` |
+| XSLTインジェクション（プロセッサフィンガープリント・XXE-via-XSLT・PHP拡張・Java拡張） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XSLT_Injection.md` |
 | PCAPからの平文認証情報抽出 | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
 | WebアプリDB（SQLite等）からのハッシュ取得 | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
 | PBKDF2-HMAC-SHA256 ハッシュのクラック（mode 10900） | Initial Access | `05_Tools_Reference/Hashcat.md` |
@@ -160,6 +162,7 @@
 | 原理 | 参照元の作業ファイル | ファイルパス |
 |------|-----------------|------------|
 | OS フィンガープリンティング（TTL 初期値の由来・FS の大文字小文字区別の仕様差） | `00_Playbook/00_OS_Identification.md` | `06_Concepts/OS_Fingerprinting_Principles.md` |
+| XSLT・XXEの動作原理（外部エンティティ解決の仕組み・libxslt の制限・パラメータエンティティ vs 一般エンティティ） | `02_Initial_Access/Web_Vulnerabilities/XSLT_Injection.md` / `02_Initial_Access/Web_Vulnerabilities/XXE.md` | `06_Concepts/XSLT_XML_Processing.md` |
 | GPP cpassword の暗号化・復号原理（固定鍵の公開・MS14-025後の挙動） | `01_Reconnaissance/SMB_Enumeration.md` / `02_Initial_Access/Credential_Discovery.md` | `06_Concepts/GPP_Credential.md` |
 | PAM の動作原理（session スタック・pam_motd・PATH ハイジャックが成立する条件） | `03_Post_Access_Linux/PAM_Misconfig.md` / `03_Post_Access_Linux/Enumeration_Checklist.md` | `06_Concepts/PAM.md` |
 | Docker の分離機構（namespace / cgroup / capability とブロックデバイス可視性） | `03_Post_Access_Linux/Sudo_Misconfig.md`（パターン4） | `06_Concepts/Docker_Isolation.md` |
