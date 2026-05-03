@@ -125,60 +125,9 @@ searchsploit --nmap nmap_allports.xml
 
 ## 技術名が分からない状態からの調査フロー
 
-アプリが使っている技術・プロトコル・脆弱性クラスの名前が分からない段階でも、以下の手順で特定できる。
+発見した機能・エラーから脆弱性クラスを特定する汎用フロー（searchsploit に限らない）は以下を参照：
 
-### ステップ1：「何が起きているか」を機能として言語化する
-
-技術名を検索する前に、アプリが何をしているかを日本語・英語で一言にする。
-
-```
-「XMLファイルとスタイルシートをアップロードするとHTMLに変換して表示する」
-→ "XML stylesheet transform"
-→ "XSLT server-side processing"
-```
-
-### ステップ2：機能 + "vulnerability" / "exploit" / "security" で検索する
-
-```
-"XSLT injection"
-"XML stylesheet vulnerability"
-"file upload XSLT exploit"
-```
-
-Google でヒットした PortSwigger・HackTricks・OWASP・PayloadsAllTheThings 等の記事を読んで脆弱性クラス名を特定する。
-
-**よく使われるリファレンスと用途：**
-
-| リソース | URL | 向いている用途 |
-|---------|-----|--------------|
-| PayloadsAllTheThings | https://github.com/swisskyrepo/PayloadsAllTheThings | 脆弱性クラスごとのペイロード一覧・カスタマイズの起点 |
-| HackTricks | https://book.hacktricks.xyz/ | 手順のガイド・環境別の注意点 |
-| PortSwigger Web Security Academy | https://portswigger.net/web-security | 脆弱性の解説・ラボ（仕組みの理解に最適） |
-| OWASP Testing Guide | https://owasp.org/www-project-web-security-testing-guide/ | 網羅的な確認項目リスト |
-
-### ステップ3：ペイロードをそのまま使わずカスタマイズする
-
-PayloadsAllTheThings 等のペイロードは「汎用テンプレート」であり、そのまま送ると動かないことが多い。以下を確認して差し替える：
-
-| 項目 | 確認内容 |
-|------|---------|
-| ファイルパス | ターゲットOSのパス形式（Linux: `/etc/passwd`、Windows: `c:/windows/win.ini`） |
-| プロトコルスキーム | `file://` / `file:///` / `php://` / `http://` の違い |
-| エンティティ名 | `&xxe;` などの名前は任意。ペイロード内で宣言と参照が一致していればよい |
-| コールバックIP | Blind系ペイロードの `ATTACKER_IP` を自分の tun0 IP に変える |
-| プロセッサ・言語固有の構文 | XSLT ならプロセッサ（libxslt / Saxon / Xalan）によって使える関数が異なる |
-
-### ステップ4：エラーメッセージを手がかりに絞り込む
-
-エラーメッセージはフィンガープリント情報。以下のパターンを検索に使う：
-
-```
-"Cannot resolve URI"  → ファイル読み込みが制限されている
-"Entity 'xxe' not defined"  → DOCTYPE内にエンティティ宣言がない
-"XPath evaluation returned no result"  → PHP拡張が無効
-```
-
-エラー文字列をそのままGoogle検索すると、同じ環境での解決方法が見つかることが多い。
+→ `../00_Playbook/Unknown_Tech_Research.md`
 
 ---
 

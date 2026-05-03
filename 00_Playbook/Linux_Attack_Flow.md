@@ -43,6 +43,8 @@ Linux と確定した上でこのファイルのStep 1以降を進める。
 - 21 (FTP), 22 (SSH), 80/443 (HTTP/S) が基本セット
 - 非標準ポートに注目（開発環境・管理用途の可能性）
 - `nmap -sC -sV` のスクリプトスキャンでバージョン情報を取得
+- **スキャン後に `searchsploit --nmap nmap_initial.xml` で既知CVEを一括確認する**（`-oA` で保存した XML が必要）
+  → `../01_Reconnaissance/Network_Scanning.md`（Step 5）
 
 ---
 

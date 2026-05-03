@@ -54,6 +54,23 @@ sudo nmap -sU --top-ports 50 --open -oA nmap_udp [IP]
 # SNMP / DNS / NTP / TFTP 等の発見に必要
 ```
 
+**Step 5: searchsploit --nmap で既知CVEを一括確認**
+
+`-oA` で保存した XML ファイルを searchsploit に渡す。nmap が検出したすべてのサービス×バージョンに対して既知エクスプロイトを一括表示する。
+
+```bash
+# [Kali] 初期スキャン結果を一括チェック
+searchsploit --nmap nmap_initial.xml
+
+# 全ポートスキャン結果も確認する場合
+searchsploit --nmap nmap_allports.xml
+```
+
+**出力が大量に出た場合の絞り込み：**
+1. Remote 系（RCE・Remote File Inclusion 等）を Local 系（LPE）より優先する（シェルを持っていない段階）
+2. `DoS` / `Denial of Service` のタイトルはスキップする
+3. ヒットしたバージョンが一致するか NVD で確認する → `../05_Tools_Reference/Searchsploit.md`（複数候補の絞り込み基準）
+
 ### ポート番号から環境を読む
 
 | ポートセット | 推測される環境 |

