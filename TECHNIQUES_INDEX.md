@@ -11,6 +11,7 @@
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
 | ポートスキャン（nmap） | Reconnaissance | `01_Reconnaissance/Network_Scanning.md` |
+| DNS調査・IP特定（nslookup・dig・ゾーン転送・サブドメイン列挙） | Reconnaissance | `01_Reconnaissance/DNS_Enumeration.md` |
 | OS判定（TTL・ポート構成・HTTPヘッダー・SMBバナー・SSH バナー） | Reconnaissance | `00_Playbook/00_OS_Identification.md` |
 | robots.txt からの隠しパス発見 | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
 | サービスバージョン検出 | Reconnaissance | `01_Reconnaissance/Network_Scanning.md` |
