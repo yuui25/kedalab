@@ -41,8 +41,7 @@ Playbook が「今どこにいるか」と「次に何をすべきか」を繋�
 | 認証情報（ID/パス）が提供済み（OS不明） | `00_Playbook/00_OS_Identification.md`（認証情報があれば SSH/RDP 接続が最速判定） |
 | ドメインのみ（IPが不明） | `01_Reconnaissance/DNS_Enumeration.md` で IP 特定 → `00_Playbook/00_OS_Identification.md` へ |
 | インターネット露出IPのみ（エッジアプライアンス・公開Webシステム等、製品・OS不明） | `00_Playbook/External_Service_Recon_Flow.md` |
-| Webシステムが疑われる（ペネトレ・シェル取得目的） | `00_Playbook/Linux_Attack_Flow.md` Step 2 |
-| Webシステムが疑われる（Web診断スコープ・脆弱性の網羅的洗い出し） | `00_Playbook/Web_Vuln_Flow.md` |
+| Webポートが開いている（80/443/8080 等・OS問わず） | `00_Playbook/Web_Recon_Flow.md`（web はまずここ。シェル取得も網羅診断もここで分岐） |
 | Linuxと判明している | `00_Playbook/Linux_Attack_Flow.md` |
 | Windowsと判明している | `00_Playbook/Windows_AD_Attack_Flow.md` |
 | 内部 VLAN に接続済み（認証情報あり・なし問わず、内部 LAN テスト開始時） | `00_Playbook/Internal_LAN_Pentest_Flow.md` |
@@ -115,8 +114,7 @@ IPだけ渡された状態からゴール（権限昇格・機密情報取得）
 |------|--------|
 | スキャン結果を見ている | `01_Reconnaissance/` |
 | インターネット露出サービス（エッジアプライアンス・公開Web）の初手 | `00_Playbook/External_Service_Recon_Flow.md` |
-| Webシステムが疑われる（ペネトレ・シェル取得目的） | `00_Playbook/Linux_Attack_Flow.md` Step 2 |
-| Webシステムが疑われる（Web診断スコープ・脆弱性網羅的洗い出し） | `00_Playbook/Web_Vuln_Flow.md` |
+| Webポートが開いている（80/443/8080 等・OS問わず） | `00_Playbook/Web_Recon_Flow.md`（web はまずここ。シェル取得も網羅診断もここで分岐） |
 | Webアプリを触っている（調査中盤） | `02_Initial_Access/Web_Vulnerabilities/` |
 | 見たことのない技術・機能に当たり、脆弱性クラスの名前もわからない | `00_Playbook/01_Unknown_Tech_Research.md` |
 | バイナリ・ファイルを取得した | `02_Initial_Access/Binary_Analysis.md` |

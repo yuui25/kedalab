@@ -94,51 +94,8 @@ searchsploit --nmap nmap_allports.xml          # 版数付き xml から既知 C
 
 ### Webサービス（80/443 または非標準ポート）が開いている場合
 
-> **80/443 のみ開いていてSSH等が開いていない場合も、この節のフローを進める。** Web脆弱性を通じたシェル取得が主経路になる。
-
-> **非標準ポート（3000, 8080, 8443, 8888 等）に HTTP サービスが動いていても、この節と同じフローを適用する。** `nmap -sC -sV` がバナーからアプリ名を識別した場合（例：`Grafana`, `Jenkins`, `Gitea`）は、**即そのアプリ名 + バージョンで searchsploit / NVD を検索する**。ログインページのフッター・ヘッダー・`/api/health` 等でバージョンを確認してから CVE を探す。
-
-> **【先に確認】nmap の出力に `Location: http://[ドメイン名]/` やホスト名らしき文字列が含まれる場合は `/etc/hosts` に追記してからアクセスする。**
-> ```bash
-> # [Attacker] /etc/hosts への追記（IP とドメイン名は環境に合わせて変更）
-> echo '[IP] [ドメイン名]' | sudo tee -a /etc/hosts
-> ```
-> IP 直打ちと `/etc/hosts` 追記後のドメイン名アクセスで画面が変わる場合（302 リダイレクト・別コンテンツ等）は、ドメイン名でのアクセスを基本にする。
-> → 検出の詳細: `../01_Reconnaissance/Network_Scanning.md`（観点・着眼点テーブル）
-
-1. ブラウザでトップページを確認 → 使用技術・フレームワーク・エンドポイントの把握
-2. **`/robots.txt` を確認する（最初の一手）**
-   - `Disallow:` エントリが「隠しパス」の地図になる
-   - 管理画面・CMSインストールパスが見つかることがある
-   - nmap `-sC` でもスキャン結果に自動表示される
-   → 詳細: `../01_Reconnaissance/Web_Enumeration.md`（robots.txt の確認）
-3. **Webアプリのバージョンを特定する**
-   - ヘッダー・フッター・ログインページ・`/api/health` 等にバージョンが表示されていないか確認
-   - 判明したら即 `searchsploit [アプリ名] [バージョン]` で既知脆弱性を検索
-   - CVE が見つかった場合、パストラバーサル / RCE 等の深刻な脆弱性が優先
-4. gobuster / ffuf でディレクトリ列挙 → `../01_Reconnaissance/Web_Enumeration.md`（ディレクトリ・エンドポイントの列挙）
-5. **エンドポイントのIDやパラメータに連番・予測可能な値がないか確認** → IDOR の可能性
-6. vhost（仮想ホスト）のファジングを検討
-7. **JS ソースに難読化コードがある場合はデコードしてAPIエンドポイントを発見する**
-   - `eval(function(p,a,c,k,e,d){...})` が見えたらブラウザ Console で `eval → console.log` に置換
-   - APIレスポンスのエンコーディング種別（ROT13 / Base64 等）も確認する
-   → `../02_Initial_Access/Web_Vulnerabilities/JS_Obfuscation.md`
-8. **APIが `username`, `host`, `ip` 等のパラメータを受け取る場合はコマンドインジェクションを試みる**
-   - まず管理者APIへの権限昇格（`is_admin=1` 等のパラメータ改ざん）を確認
-   - `; id` で注入テスト → リバースシェルへ
-   → `../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md`
-9. **URL を入力して何かを生成・取得するフォームがある場合（PDF 生成・プレビュー・スクリーンショット等）**
-   - レスポンスヘッダーで使用言語・ライブラリを確認（`X-Runtime: Ruby` / `X-Powered-By` 等）
-   - 生成物（PDF・画像等）のメタデータからライブラリ名・バージョンを確認（`exiftool` / strings）
-   - バージョンが特定できたら即 `searchsploit [ライブラリ名] [バージョン]` で CVE を検索
-   - **PDFKit 0.8.6 未満なら CVE-2022-25765（バックティック URL 注入 → RCE）が有効**（修正版は 0.8.6。0.8.6 自体はパッチ済みなので除外）
-   - SSRF として内部ネットワーク探索にも使える可能性がある
-   → `../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md`（PDFKit セクション）
-
-→ 詳細: `../01_Reconnaissance/Web_Enumeration.md`
-→ CVE 検索: `../05_Tools_Reference/Searchsploit.md`
-→ パストラバーサル: `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`
-→ 見たことのない技術・機能に当たって脆弱性クラスが特定できない場合: `../00_Playbook/01_Unknown_Tech_Research.md`
+> **web の初動列挙は OS 中立なので [`Web_Recon_Flow.md`](./Web_Recon_Flow.md) に集約した。** /etc/hosts 追記・robots・バージョン特定・ディレクトリ列挙・観測別の分岐（SQLi / CmdInj / IDOR 等）はそちらを参照。
+> web で認証情報を入手したら、このファイル（Linux 本流）に戻って SSH 等で使う。
 
 ### SSHが開いている場合
 - バナー・バージョンを確認する（`nmap -sV` の出力）

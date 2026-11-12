@@ -94,23 +94,22 @@ searchsploit --nmap nmap_allports.xml          # 版数付き xml から既知 C
 
 > **▶ 記録:** open ポート一覧（この後の経路選択で繰り返し参照する）と OS / ビルドを控える。→ Worksheet「PORTS」欄・上部「OS」欄。
 
-**nmap でWebポート（80・443・8080 等）のみが開いている場合：**
+**Webポート（80・443・8080 等）が開いている場合（他ポートと混在でも）：**
 
-AD・SMB 関連のステップ（Step 2・4〜7）は全部スキップし、**Web 偵察を最初の行動にする。**
+web が開いていれば、AD / SMB の経路選択より先に **web 偵察を済ませる**。認証情報を持たない段階では web が最短の初期侵入面になりやすく、WinRM（5985）/ RDP（3389）等は **cred 入手後の経路**。「5985 を見た → WinRM.md 直行」で 80 番を取りこぼさない。
 
 ```
-Step 0 でWebのみ確認
+Step 0 で web ポートを確認（web のみでも、5985 等と混在でも）
        ↓
-→ ../01_Reconnaissance/Web_Enumeration.md へ直行
-  （robots.txt 確認 → アプリ名特定 → ディレクトリ列挙 → バージョン確認 → searchsploit）
+→ ../00_Playbook/Web_Recon_Flow.md（OS 中立の web 初動：/etc/hosts・robots・
+   バージョン特定・ディレクトリ列挙・観測別の分岐を集約）
        ↓
-→ 脆弱性が特定できたら ../02_Initial_Access/Web_Vulnerabilities/ の該当ファイルへ
+→ web で認証情報を入手したら、この Windows 本流（Step 2 以降）に戻り WinRM / SMB 等で使う
        ↓
 → シェル取得後 → ../04_Post_Access_Windows_AD/Enumeration_Checklist.md へ
 ```
 
-> **「Web しかない」は「攻撃面が少ない」ではなく「Web が唯一の入口」という意味。**
-> robots.txt・アプリ名・ディレクトリ列挙・バージョン確認を確実に行う。
+> **「Web が唯一の入口」の場合**（他に AD/SMB が無い）は AD 系ステップ（Step 2・4〜7）をスキップしてよいが、**web と AD ポートが混在する場合も web 偵察を飛ばさない。** cred は web から出ることが多い。
 
 ---
 
